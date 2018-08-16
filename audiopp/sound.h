@@ -19,8 +19,8 @@ public:
 	sound();
 	~sound();
 	sound(sound_data&& data, bool stream = false);
-	sound(sound&& rhs) noexcept;
-	sound& operator=(sound&& rhs) noexcept;
+	sound(sound&& rhs) noexcept = default;
+	sound& operator=(sound&& rhs) noexcept = default;
 
 	sound(const sound& rhs) = delete;
 	sound& operator=(const sound& rhs) = delete;
