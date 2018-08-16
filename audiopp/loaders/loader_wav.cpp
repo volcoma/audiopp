@@ -189,7 +189,7 @@ bool load_wav_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 	result.info.bytes_per_sample = std::uint8_t(header.format.bit_depth) / 8;
 
 	std::memcpy(result.data.data(), data + wav_header::spec_sz, result.data.size());
-	result.info.channels = std::uint32_t(header.format.num_channels);
+	result.info.channels = std::uint8_t(header.format.num_channels);
 
 	return true;
 }

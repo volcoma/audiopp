@@ -29,7 +29,7 @@ bool load_ogg_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 		return false;
 	}
 	stb_vorbis_info info = stb_vorbis_get_info(oss);
-	result.info.channels = std::uint32_t(info.channels);
+	result.info.channels = std::uint8_t(info.channels);
 	result.info.sample_rate = info.sample_rate;
 	result.info.bytes_per_sample = sizeof(std::int16_t);
 

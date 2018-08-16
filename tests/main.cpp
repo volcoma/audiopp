@@ -72,6 +72,17 @@ struct test_info
 	audio::sound_info expected;
 };
 
+void add_expected_info(std::vector<test_info>& infos, const std::string& file, uint32_t sample_rate,
+			  uint8_t bytes_per_sample, uint8_t channels)
+{
+    test_info info;
+    info.file = file;
+    info.expected.sample_rate = sample_rate;
+    info.expected.bytes_per_sample = bytes_per_sample;
+    info.expected.channels = channels;
+    infos.emplace_back(info);
+}
+
 int main()
 {
 	audio::set_info_logger([](const std::string& msg) { std::cout << msg << std::endl; });
@@ -81,27 +92,25 @@ int main()
 		// initialize the audio device
 		audio::device device;
 
-		std::vector<test_info> infos = {
+		std::vector<test_info> infos;
+        add_expected_info(infos, DATA "pcm0822m.wav", 22050, 1, 1);
+        add_expected_info(infos, DATA "pcm1622m.wav", 22050, 2, 1);
+        add_expected_info(infos, DATA "pcm0822s.wav", 22050, 1, 2);
+        add_expected_info(infos, DATA "pcm1622s.wav", 22050, 2, 2);
+        add_expected_info(infos, DATA "pcm0844m.wav", 44100, 1, 1);
+        add_expected_info(infos, DATA "pcm1644m.wav", 44100, 2, 1);
+        add_expected_info(infos, DATA "pcm0844s.wav", 44100, 1, 2);
+        add_expected_info(infos, DATA "pcm1644s.wav", 44100, 2, 2);
 
-			{DATA "pcm0822m.wav", {1, 22050, 1, {}}},
-			{DATA "pcm1622m.wav", {2, 22050, 1, {}}},
-			{DATA "pcm0822s.wav", {1, 22050, 2, {}}},
-			{DATA "pcm1622s.wav", {2, 22050, 2, {}}},
-			{DATA "pcm0844m.wav", {1, 44100, 1, {}}},
-			{DATA "pcm1644m.wav", {2, 44100, 1, {}}},
-			{DATA "pcm0844s.wav", {1, 44100, 2, {}}},
-			{DATA "pcm1644s.wav", {2, 44100, 2, {}}},
-
-			// ogg loader will force 2 bytes per channel
-			{DATA "pcm0822m.ogg", {2, 22050, 1, {}}},
-			{DATA "pcm1622m.ogg", {2, 22050, 1, {}}},
-			{DATA "pcm0822s.ogg", {2, 22050, 2, {}}},
-			{DATA "pcm1622s.ogg", {2, 22050, 2, {}}},
-			{DATA "pcm0844m.ogg", {2, 44100, 1, {}}},
-			{DATA "pcm1644m.ogg", {2, 44100, 1, {}}},
-			{DATA "pcm0844s.ogg", {2, 44100, 2, {}}},
-			{DATA "pcm1644s.ogg", {2, 44100, 2, {}}},
-		};
+        // ogg loader will force 2 bytes per sample
+        add_expected_info(infos, DATA "pcm0822m.ogg", 22050, 2, 1);
+        add_expected_info(infos, DATA "pcm1622m.ogg", 22050, 2, 1);
+        add_expected_info(infos, DATA "pcm0822s.ogg", 22050, 2, 2);
+        add_expected_info(infos, DATA "pcm1622s.ogg", 22050, 2, 2);
+        add_expected_info(infos, DATA "pcm0844m.ogg", 44100, 2, 1);
+        add_expected_info(infos, DATA "pcm1644m.ogg", 44100, 2, 1);
+        add_expected_info(infos, DATA "pcm0844s.ogg", 44100, 2, 2);
+        add_expected_info(infos, DATA "pcm1644s.ogg", 44100, 2, 2);
 
 		std::vector<audio::sound_data> loaded_sounds;
 
@@ -153,6 +162,7 @@ int main()
 
 			loaded_sounds.emplace_back(std::move(data));
 		}
+        audio::log_info("------------------------------------------");
 
 		for(auto& data : loaded_sounds)
 		{
