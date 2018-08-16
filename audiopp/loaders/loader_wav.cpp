@@ -15,6 +15,16 @@ static void endian_swap(T* objp)
 }
 } // namespace detail
 
+namespace formats
+{
+
+// constexpr int PCM = 0x0001;
+// constexpr int IEEE_SINGLE = 0x0003;
+// constexpr int MULAW = 0x0007;
+// constexpr int EXTENSIBLE = 0xFFFE;
+
+} // namespace formats
+
 struct riff_header
 {
 	constexpr static const std::size_t spec_sz = 12;
@@ -130,7 +140,7 @@ static bool read_header(wav_header& header, const std::uint8_t* data)
 
 	std::memcpy(&header.data, data + offset, data_header::spec_sz);
 
-	return false;
+	return true;
 }
 
 bool load_wav_from_memory(const std::uint8_t* data, std::size_t data_size, sound_data& result,
@@ -148,7 +158,7 @@ bool load_wav_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 	}
 
 	wav_header header;
-	if(read_header(header, data))
+	if(!read_header(header, data))
 	{
 		err = "ERROR : Incorrect wav header";
 		return false;
