@@ -14,7 +14,7 @@ matrix:
       compiler: clang
       addons: &clang38
         apt:
-          sources: 
+          sources:
             - llvm-toolchain-trusty-3.8
             - ubuntu-toolchain-r-test
           packages:
@@ -22,7 +22,7 @@ matrix:
             - clang-3.8
             - cmake
             - cmake-data
-      env: 
+      env:
         - COMPILERCXX='clang++-3.8'
         - COMPILERC='clang-3.8'
 
@@ -30,7 +30,7 @@ matrix:
       compiler: clang
       addons: &clang39
         apt:
-          sources: 
+          sources:
             - llvm-toolchain-trusty-3.9
             - ubuntu-toolchain-r-test
           packages:
@@ -38,7 +38,7 @@ matrix:
             - clang-3.9
             - cmake
             - cmake-data
-      env: 
+      env:
         - COMPILERCXX='clang++-3.9'
         - COMPILERC='clang-3.9'
 
@@ -46,7 +46,7 @@ matrix:
       compiler: clang
       addons: &clang40
         apt:
-          sources: 
+          sources:
             - llvm-toolchain-trusty-4.0
             - ubuntu-toolchain-r-test
           packages:
@@ -54,15 +54,15 @@ matrix:
             - clang-4.0
             - cmake
             - cmake-data
-      env: 
+      env:
         - COMPILERCXX='clang++-4.0'
         - COMPILERC='clang-4.0'
-    
+
     - os: linux
       compiler: clang
       addons: &clang50
         apt:
-          sources: 
+          sources:
             - llvm-toolchain-trusty-5.0
             - ubuntu-toolchain-r-test
           packages:
@@ -70,16 +70,16 @@ matrix:
             - clang-5.0
             - cmake
             - cmake-data
-      env: 
+      env:
         - COMPILERCXX='clang++-5.0'
         - COMPILERC='clang-5.0'
-    
+
     # 2/ Linux GCC Builds
     - os: linux
       compiler: gcc
       addons: &gcc5
         apt:
-          sources: 
+          sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
@@ -93,7 +93,7 @@ matrix:
       compiler: gcc
       addons: &gcc6
         apt:
-          sources: 
+          sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
@@ -102,12 +102,12 @@ matrix:
       env:
         - COMPILERCXX='g++-6'
         - COMPILERC='gcc-6'
-        
+
     - os: linux
       compiler: gcc
       addons: &gcc7
         apt:
-          sources: 
+          sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-7
@@ -116,8 +116,10 @@ matrix:
       env:
         - COMPILERCXX='g++-7'
         - COMPILERC='gcc-7'
-        
-  
+
+before_install:
+  - sudo apt-get install -y libopenal-dev        
+
 script:
   - git submodule update --init --recursive
   - mkdir build
