@@ -1,7 +1,6 @@
 #include "source_impl.h"
 
 #include "../exception.h"
-#include "../logger.h"
 #include "check.h"
 #include "sound_impl.h"
 
@@ -51,14 +50,6 @@ bool source_impl::bind(sound_impl* sound)
 	al_check(alSourcei(handle_, AL_BUFFER, 0));
 	alSourceQueueBuffers(handle_, ALsizei(handles.size()), handles.data());
 
-	// optional info
-	ALint channels = 1;
-	al_check(alGetBufferi(handles.front(), AL_CHANNELS, &channels));
-	if(channels > 1)
-	{
-		log_info("Sound is not mono. 3D Attenuation will not work.");
-	}
-
 	return true;
 }
 
@@ -73,11 +64,11 @@ void source_impl::unbind()
 {
 	stop();
 
-	ALint queued;
+	ALint queued = 0;
 	al_check(alGetSourcei(handle_, AL_BUFFERS_QUEUED, &queued));
 	while(queued--)
 	{
-		ALuint buffer;
+		ALuint buffer = 0;
 		al_check(alSourceUnqueueBuffers(handle_, 1, &buffer));
 	}
 

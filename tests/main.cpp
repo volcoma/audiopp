@@ -163,9 +163,16 @@ int main()
 			loaded_sounds.emplace_back(std::move(data));
 		}
         audio::log_info("------------------------------------------");
+        audio::log_info("Playing sounds");
 
 		for(auto& data : loaded_sounds)
 		{
+            audio::log_info("------------------------------------------");
+			audio::log_info("playing");
+			audio::log_info("bytes_per_sample : " + std::to_string(data.info.bytes_per_sample));
+			audio::log_info("sample_rate : " + std::to_string(data.info.sample_rate));
+			audio::log_info("channels : " + std::to_string(data.info.channels));
+
 			audio::sound sound(std::move(data));
 			audio::source source;
 
