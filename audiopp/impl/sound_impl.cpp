@@ -98,7 +98,7 @@ bool sound_impl::load_buffer(const size_t chunk_size)
 		size = chunk_size;
 	}
 
-	native_handle_type h;
+	native_handle_type h = 0;
 	al_check(alGenBuffers(1, &h));
 	al_check(alBufferData(h, format, buf_.data() + buf_ptr_, ALsizei(size), ALsizei(buf_info_.sample_rate)));
 	handles_.push_back(h);
@@ -153,9 +153,11 @@ void sound_impl::unbind_from_source(source_impl* source)
 
 void sound_impl::unbind_from_all_sources()
 {
-	mutex_.lock();
-	auto all_sources = std::move(bound_to_sources_);
-	mutex_.unlock();
+    auto all_sources = [&]()
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return std::move(bound_to_sources_);
+    }();
 
 	for(auto& source : all_sources)
 	{

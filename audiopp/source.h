@@ -38,7 +38,7 @@ public:
 	//-----------------------------------------------------------------------------
 	/// Specifies whether source is looping.
 	//-----------------------------------------------------------------------------
-	void set_loop(bool on);
+	void set_loop(bool on) const;
 
 	//-----------------------------------------------------------------------------
 	/// A value of 1.0 means unattenuated. Each division by 2 equals an attenuation
@@ -46,33 +46,33 @@ public:
 	/// A value of 0.0 is meaningless with respect to a logarithmic scale; it is
 	/// silent.
 	//-----------------------------------------------------------------------------
-	void set_volume(float volume);
+	void set_volume(float volume) const;
 
 	//-----------------------------------------------------------------------------
 	/// A multiplier for the frequency (sample rate) of the source's buffer.
 	//-----------------------------------------------------------------------------
-	void set_pitch(float pitch);
+	void set_pitch(float pitch) const;
 
 	//-----------------------------------------------------------------------------
 	/// The source location in three dimensional space.
 	//-----------------------------------------------------------------------------
-	void set_position(const float3& position);
+	void set_position(const float3& position) const;
 
 	//-----------------------------------------------------------------------------
 	/// Specifies the current velocity in local space.
 	//-----------------------------------------------------------------------------
-	void set_velocity(const float3& velocity);
+	void set_velocity(const float3& velocity) const;
 
 	//-----------------------------------------------------------------------------
 	/// Effectively two three dimensional vectors. The first vector is the front (or
 	/// "at") and the second is the top (or "up").
 	//-----------------------------------------------------------------------------
-	void set_orientation(const float3& direction, const float3& up);
+	void set_orientation(const float3& direction, const float3& up) const;
 
 	//-----------------------------------------------------------------------------
 	/// Multiplier to exaggerate or diminish distance attenuation.
 	//-----------------------------------------------------------------------------
-	void set_volume_rolloff(float rolloff);
+	void set_volume_rolloff(float rolloff) const;
 
 	//-----------------------------------------------------------------------------
 	/// Min = The distance in units that no attenuation occurs.
@@ -80,7 +80,7 @@ public:
 	/// clamped distance model, or where attenuation reaches 0.0 gain for linear
 	/// distance models with a default rolloff factor.
 	//-----------------------------------------------------------------------------
-	void set_distance(float mind, float maxd);
+	void set_distance(float mind, float maxd) const;
 
 	//-----------------------------------------------------------------------------
 	/// Sets the source buffer position, in seconds.

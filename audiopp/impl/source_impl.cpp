@@ -56,7 +56,7 @@ bool source_impl::bind(sound_impl* sound)
 bool source_impl::has_binded_sound() const
 {
 	ALint buffer = 0;
-	al_check(alGetSourcei(handle_, AL_BUFFER, &buffer));
+	al_check(alGetSourcei(handle_, AL_BUFFERS_QUEUED, &buffer));
 	return buffer != 0;
 }
 
@@ -125,6 +125,7 @@ void source_impl::play() const
 
 void source_impl::stop() const
 {
+    set_loop(false);
 	al_check(alSourceStop(handle_));
 }
 
@@ -161,45 +162,45 @@ bool source_impl::is_binded() const
 	return (buffer != 0);
 }
 
-void source_impl::set_loop(bool on)
+void source_impl::set_loop(bool on) const
 {
 	al_check(alSourcei(handle_, AL_LOOPING, on ? AL_TRUE : AL_FALSE));
 }
 
-void source_impl::set_volume(float volume)
+void source_impl::set_volume(float volume) const
 {
 	al_check(alSourcef(handle_, AL_GAIN, volume));
 }
 
 /* pitch, speed stretching */
-void source_impl::set_pitch(float pitch)
+void source_impl::set_pitch(float pitch) const
 {
 	// if pitch == 0.f pitch = 0.0001f;
 	al_check(alSourcef(handle_, AL_PITCH, pitch));
 }
 
-void source_impl::set_position(const float3& position)
+void source_impl::set_position(const float3& position) const
 {
 	al_check(alSourcefv(handle_, AL_POSITION, position.data()));
 }
 
-void source_impl::set_velocity(const float3& velocity)
+void source_impl::set_velocity(const float3& velocity) const
 {
 	al_check(alSourcefv(handle_, AL_VELOCITY, velocity.data()));
 }
 
-void source_impl::set_orientation(const float3& direction, const float3& up)
+void source_impl::set_orientation(const float3& direction, const float3& up) const
 {
 	float orientation6[] = {-direction[0], -direction[1], -direction[2], up[0], up[1], up[2]};
 	al_check(alSourcefv(handle_, AL_ORIENTATION, orientation6));
 }
 
-void source_impl::set_volume_rolloff(float rolloff)
+void source_impl::set_volume_rolloff(float rolloff) const
 {
 	al_check(alSourcef(handle_, AL_ROLLOFF_FACTOR, rolloff));
 }
 
-void source_impl::set_distance(float mind, float maxd)
+void source_impl::set_distance(float mind, float maxd) const
 {
 
 	// The distance that the source will be the loudest (if the listener is
@@ -233,7 +234,7 @@ void source_impl::update_stream()
 
 void source_impl::enqueue_buffer(source_impl::native_handle_type h)
 {
-	alSourceQueueBuffers(handle_, 1, &h);
+    al_check(alSourceQueueBuffers(handle_, 1, &h));
 }
 
 source_impl::native_handle_type source_impl::native_handle() const

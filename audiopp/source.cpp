@@ -73,7 +73,7 @@ bool source::is_looping() const
 	return false;
 }
 
-void source::set_loop(bool on)
+void source::set_loop(bool on) const
 {
 	if(is_valid())
 	{
@@ -81,7 +81,7 @@ void source::set_loop(bool on)
 	}
 }
 
-void source::set_volume(float volume)
+void source::set_volume(float volume) const
 {
 	if(is_valid())
 	{
@@ -90,7 +90,7 @@ void source::set_volume(float volume)
 }
 
 /* pitch, speed stretching */
-void source::set_pitch(float pitch)
+void source::set_pitch(float pitch) const
 {
 	// if pitch == 0.f pitch = 0.0001f;
 	if(is_valid())
@@ -99,7 +99,7 @@ void source::set_pitch(float pitch)
 	}
 }
 
-void source::set_position(const float3& position)
+void source::set_position(const float3& position) const
 {
 	if(is_valid())
 	{
@@ -107,7 +107,7 @@ void source::set_position(const float3& position)
 	}
 }
 
-void source::set_velocity(const float3& velocity)
+void source::set_velocity(const float3& velocity) const
 {
 	if(is_valid())
 	{
@@ -115,7 +115,7 @@ void source::set_velocity(const float3& velocity)
 	}
 }
 
-void source::set_orientation(const float3& direction, const float3& up)
+void source::set_orientation(const float3& direction, const float3& up) const
 {
 	if(is_valid())
 	{
@@ -123,7 +123,7 @@ void source::set_orientation(const float3& direction, const float3& up)
 	}
 }
 
-void source::set_volume_rolloff(float rolloff)
+void source::set_volume_rolloff(float rolloff) const
 {
 	if(is_valid())
 	{
@@ -131,7 +131,7 @@ void source::set_volume_rolloff(float rolloff)
 	}
 }
 
-void source::set_distance(float mind, float maxd)
+void source::set_distance(float mind, float maxd) const
 {
 	if(is_valid())
 	{

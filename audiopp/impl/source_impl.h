@@ -30,15 +30,15 @@ public:
 	void unbind();
 	void purge();
 
-	void set_loop(bool on);
-	void set_volume(float volume);
-	void set_pitch(float pitch);
-	void set_position(const float3& position);
-	void set_velocity(const float3& velocity);
-	void set_orientation(const float3& direction, const float3& up);
+	void set_loop(bool on) const;
+	void set_volume(float volume) const;
+	void set_pitch(float pitch) const;
+	void set_position(const float3& position) const;
+	void set_velocity(const float3& velocity) const;
+	void set_orientation(const float3& direction, const float3& up) const;
 
-	void set_volume_rolloff(float rolloff);
-	void set_distance(float mind, float maxd);
+	void set_volume_rolloff(float rolloff) const;
+	void set_distance(float mind, float maxd) const;
 	void set_playing_offset(float seconds);
 	float get_playing_offset() const;
 	float get_playing_duration() const;
