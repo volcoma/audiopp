@@ -5,7 +5,7 @@ file(GLOB_RECURSE libsrc *.h *.cpp *.hpp *.c *.cc)
 add_executable(tests ${libsrc})
 
 target_link_libraries(tests PUBLIC audiopp)
-target_compile_definitions(tests PUBLIC DATA="${CMAKE_CURRENT_SOURCE_DIR}/../tests_data/")
+target_compile_definitions(tests PUBLIC DATA="${CMAKE_CURRENT_SOURCE_DIR}/tests_data/")
 
 set_target_properties(tests PROPERTIES
     CXX_STANDARD 14
