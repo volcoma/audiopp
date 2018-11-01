@@ -6,8 +6,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mo
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake/utility")
 
 option(BUILD_AUDIOPP_SHARED "Build as a shared library." ON)
-option(BUILD_AUDIOPP_TESTS "Build the tests" ON)
-option(BUILD_AUDIOPP_WITH_CODE_STYLE_CHECKS "Build with code style checks." ON)
+option(BUILD_AUDIOPP_TESTS "Build the tests" OFF)
+option(BUILD_AUDIOPP_WITH_CODE_STYLE_CHECKS "Build with code style checks." OFF)
 
 if(BUILD_AUDIOPP_TESTS)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)

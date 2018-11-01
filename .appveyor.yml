@@ -96,5 +96,5 @@ build_script:
   - git submodule update --init --recursive
   - mkdir build
   - cd build
-  - cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release ..
+  - cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_AUDIOPP_TESTS=ON ..
   - cmake --build .
