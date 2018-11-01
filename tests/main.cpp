@@ -2,67 +2,9 @@
 #include "audiopp/loaders/loader.h"
 
 #include <chrono>
-#include <fstream>
 #include <iostream>
 #include <string>
 #include <thread>
-
-namespace detail
-{
-template <typename Container = std::string, typename CharT = char, typename Traits = std::char_traits<char>>
-auto read_stream_into_container(std::basic_istream<CharT, Traits>& in,
-								typename Container::allocator_type alloc = {})
-{
-	static_assert(
-		// Allow only strings...
-		std::is_same<Container,
-					 std::basic_string<CharT, Traits, typename Container::allocator_type>>::value ||
-			// ... and vectors of the plain, signed, and
-			// unsigned flavours of CharT.
-			std::is_same<Container, std::vector<CharT, typename Container::allocator_type>>::value ||
-			std::is_same<Container, std::vector<std::make_unsigned_t<CharT>,
-												typename Container::allocator_type>>::value ||
-			std::is_same<Container,
-						 std::vector<std::make_signed_t<CharT>, typename Container::allocator_type>>::value,
-		"only strings and vectors of ((un)signed) CharT allowed");
-
-	auto const start_pos = in.tellg();
-	if(std::streamsize(-1) == start_pos)
-	{
-		throw std::ios_base::failure{"error"};
-	};
-
-	if(!in.ignore(std::numeric_limits<std::streamsize>::max()))
-	{
-		throw std::ios_base::failure{"error"};
-	};
-	auto const char_count = in.gcount();
-
-	if(!in.seekg(start_pos))
-	{
-		throw std::ios_base::failure{"error"};
-	};
-
-	auto container = Container(std::move(alloc));
-	container.resize(static_cast<std::size_t>(char_count));
-
-	if(!container.empty())
-	{
-		if(!in.read(reinterpret_cast<CharT*>(&container[0]), char_count))
-		{
-			throw std::ios_base::failure{"error"};
-		};
-	}
-
-	return container;
-}
-} // namespace detail
-using byte_array_t = std::vector<uint8_t>;
-
-byte_array_t read_stream(std::istream& stream)
-{
-	return detail::read_stream_into_container<byte_array_t>(stream);
-}
 
 using namespace std::chrono_literals;
 
@@ -116,29 +58,10 @@ int main()
 
 		for(const auto& info : infos)
 		{
-			std::ifstream stream(info.file, std::ios::in | std::ios::binary);
-
-			if(!stream.is_open())
-			{
-				audio::log_error("Failed to load file " + info.file);
-				continue;
-			}
-
-			auto buffer = read_stream(stream);
-
 			// Try to load the sound data
 			std::string err;
 			audio::sound_data data;
-			bool success = false;
-			if(!success)
-			{
-				success |= audio::load_wav_from_memory(buffer.data(), buffer.size(), data, err);
-			}
-			if(!success)
-			{
-				success |= audio::load_ogg_from_memory(buffer.data(), buffer.size(), data, err);
-			}
-			if(!success)
+			if(!audio::load_from_file(info.file, data, err))
 			{
 				audio::log_error("Failed to load sound data");
 				continue;
