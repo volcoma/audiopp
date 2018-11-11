@@ -1,4 +1,7 @@
-# audiopp
+## audiopp c++14 audio library
+- Supports .wav/.ogg formats
+- Supports 3d sounds
+- Basically a thin wrapper over OpenAL
 
 
 ```c++
@@ -18,6 +21,8 @@ int main()
     // initialize the audio device
     audio::device device;
     
+    // create a listener. There can only be one listener
+    // per application. 
     audio::listener listener;
     
     // 3d positioning only work with mono sounds
