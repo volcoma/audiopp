@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/volcoma/audiopp.svg)](https://travis-ci.org/volcoma/audiopp)
+[![Build Status](https://travis-ci.org/volcoma/audiopp.svg?branch=master)](https://travis-ci.org/volcoma/audiopp)
 [![Build status](https://ci.appveyor.com/api/projects/status/ytbigal46vf5kr2t?svg=true)](https://ci.appveyor.com/project/volcoma/audiopp)
 
 ## audiopp c++14 audio library
