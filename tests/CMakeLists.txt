@@ -1,20 +1,25 @@
 message(STATUS "Enabled tests.")
 
+set(target_name audiopp_test)
+
 file(GLOB_RECURSE libsrc *.h *.cpp *.hpp *.c *.cc)
 
-add_executable(tests ${libsrc})
+add_executable(${target_name} ${libsrc})
 
-target_link_libraries(tests PUBLIC audiopp)
-target_compile_definitions(tests PUBLIC DATA="${CMAKE_CURRENT_SOURCE_DIR}/tests_data/")
+target_link_libraries(${target_name} PUBLIC audiopp)
+target_compile_definitions(${target_name} PUBLIC DATA="${CMAKE_CURRENT_SOURCE_DIR}/tests_data/")
 
-set_target_properties(tests PROPERTIES
+set_target_properties(${target_name} PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO
 )
 
 include(target_warning_support)
-set_warning_level(tests ultra)
+set_warning_level(${target_name} ultra)
 
 include(target_code_style_support)
-set_code_style(tests lower_case check_headers "${extra_flags}")
+set_code_style(${target_name} lower_case check_headers "${extra_flags}")
+
+enable_testing()
+add_test(NAME ${target_name} COMMAND ${target_name})
