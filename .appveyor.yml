@@ -51,7 +51,7 @@ install:
   - set PATH=C:\projects\deps\ninja;%PATH%
   - ninja --version
 
-  - curl "http://openal-soft.org/openal-binaries/openal-soft-1.18.2-bin.zip" -o openal-soft-1.18.2-bin.zip
+  - curl -L "http://openal-soft.org/openal-binaries/openal-soft-1.18.2-bin.zip" -o openal-soft-1.18.2-bin.zip
   - 7z x -o%APPVEYOR_BUILD_FOLDER%\.. openal-soft-1.18.2-bin.zip
   - set OPENALDIR=%APPVEYOR_BUILD_FOLDER%\..\openal-soft-1.18.2-bin
   #######################################################################################
