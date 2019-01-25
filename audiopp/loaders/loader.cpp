@@ -1,6 +1,6 @@
 #include "loader.h"
-#include <fstream>
 #include "../logger.h"
+#include <fstream>
 
 namespace audio
 {
@@ -61,68 +61,79 @@ byte_array_t read_stream(std::istream& stream)
 	return detail::read_stream_into_container<byte_array_t>(stream);
 }
 
-bool load_file(const std::string& path, byte_array_t& buffer)
+std::string get_extension(const std::string& path)
 {
-    std::ifstream stream(path, std::ios::in | std::ios::binary);
+	auto idx = path.rfind('.');
 
-    if(!stream.is_open())
-    {
-        return false;
-    }
-
-    buffer = read_stream(stream);
-    return true;
+	if(idx != std::string::npos)
+	{
+		return path.substr(idx + 1);
+	}
+	return {};
 }
 
-
-bool load_from_memory(const uint8_t *data, size_t size, sound_data &result, std::string &err)
+bool load_file(const std::string& path, byte_array_t& buffer)
 {
-    bool success = false;
-    if(!success)
-    {
-        success |= load_wav_from_memory(data, size, result, err);
-    }
-    if(!success)
-    {
-        success |= load_ogg_from_memory(data, size, result, err);
-    }
-    return success;
+	std::ifstream stream(path, std::ios::in | std::ios::binary);
+
+	if(!stream.is_open())
+	{
+		return false;
+	}
+
+	buffer = read_stream(stream);
+	return true;
+}
+
+bool load_from_memory(const uint8_t* data, size_t size, sound_data& result, std::string& err)
+{
+	bool success = false;
+	if(!success)
+	{
+		success |= load_wav_from_memory(data, size, result, err);
+	}
+	if(!success)
+	{
+		success |= load_ogg_from_memory(data, size, result, err);
+	}
+	return success;
 }
 
 bool load_ogg_from_file(const std::string& path, sound_data& result, std::string& err)
 {
-    byte_array_t buffer;
-    if(!load_file(path, buffer))
-    {
-        log_error("Failed to load file " + path);
-        return false;
-    }
+	byte_array_t buffer;
+	if(!load_file(path, buffer))
+	{
+		log_error("Failed to load file " + path);
+		return false;
+	}
 
-    return load_ogg_from_memory(buffer.data(), buffer.size(), result, err);
+	return load_ogg_from_memory(buffer.data(), buffer.size(), result, err);
 }
 bool load_wav_from_file(const std::string& path, sound_data& result, std::string& err)
 {
-    byte_array_t buffer;
-    if(!load_file(path, buffer))
-    {
-        log_error("Failed to load file " + path);
-        return false;
-    }
+	byte_array_t buffer;
+	if(!load_file(path, buffer))
+	{
+		log_error("Failed to load file " + path);
+		return false;
+	}
 
-    return load_wav_from_memory(buffer.data(), buffer.size(), result, err);
+	return load_wav_from_memory(buffer.data(), buffer.size(), result, err);
 }
 
-bool load_from_file(const std::string &path, sound_data &result, std::string &err)
+bool load_from_file(const std::string& path, sound_data& result, std::string& err)
 {
-    byte_array_t buffer;
-    if(!load_file(path, buffer))
-    {
-        log_error("Failed to load file " + path);
-        return false;
-    }
-
-    return load_from_memory(buffer.data(), buffer.size(), result, err);
+	auto ext = get_extension(path);
+	if(ext == "wav")
+	{
+		return load_wav_from_file(path, result, err);
+	}
+	else if(ext == "ogg")
+	{
+		return load_ogg_from_file(path, result, err);
+	}
+	return false;
 }
-
 
 } // namespace audio

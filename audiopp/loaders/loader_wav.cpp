@@ -5,16 +5,6 @@
 namespace audio
 {
 
-namespace detail
-{
-template <class T>
-static void endian_swap(T* objp)
-{
-	auto memp = reinterpret_cast<std::uint8_t*>(objp);
-	std::reverse(memp, memp + sizeof(T));
-}
-} // namespace detail
-
 namespace formats
 {
 
@@ -91,8 +81,6 @@ struct data_header
 /// are in big-endian byte order.
 struct wav_header
 {
-	constexpr static const std::size_t spec_sz =
-		riff_header::spec_sz + format_header::spec_sz + data_header::spec_sz;
 	//------------------
 	// RIFF Header
 	//------------------
@@ -109,36 +97,58 @@ struct wav_header
 	data_header data;
 };
 
-static void convert_to_little_endian(wav_header& header)
+bool get_chunk_offset(const std::uint8_t* data, size_t size, const std::string& chunk_id, size_t& offset)
 {
-	detail::endian_swap(header.riff.header);
-	detail::endian_swap(header.riff.wave_header);
-	detail::endian_swap(header.format.header);
-	detail::endian_swap(header.data.header);
+	auto chunk_id_len = chunk_id.length();
+	for(size_t i = 0; i < size - chunk_id_len; i++)
+	{
+		std::string section(data + i, data + i + chunk_id_len);
+		if(section == chunk_id)
+		{
+			offset = i;
+			return true;
+		}
+	}
+
+	return false;
 }
 
-static bool read_header(wav_header& header, const std::uint8_t* data)
+static bool read_header(wav_header& header, const std::uint8_t* data, size_t size, size_t& offset)
 {
-	size_t offset = 0;
-
 	std::memcpy(&header.riff, data, riff_header::spec_sz);
-
-	offset += riff_header::spec_sz;
-
-	std::memcpy(&header.format, data + offset, format_header::spec_sz);
-
-	// here we do not use the format_header::spec_sz since some wave formats
-	// may have some extra bytes here.
-	std::size_t offset_to_data = sizeof(header.format.header) + sizeof(header.format.fmt_chunk_size) +
-								 size_t(header.format.fmt_chunk_size);
-
-	if(offset_to_data < format_header::spec_sz)
+	if(std::memcmp(header.riff.header, "RIFF", 4) != 0)
 	{
 		return false;
 	}
-	offset += offset_to_data;
 
-	std::memcpy(&header.data, data + offset, data_header::spec_sz);
+	data += riff_header::spec_sz;
+	size -= offset + riff_header::spec_sz;
+
+	if(!get_chunk_offset(data, size, "fmt ", offset))
+	{
+		return false;
+	}
+
+	data += offset;
+
+	std::memcpy(&header.format, data, format_header::spec_sz);
+
+	data += format_header::spec_sz;
+	size -= offset + format_header::spec_sz;
+
+	if(!get_chunk_offset(data, size, "data", offset))
+	{
+		return false;
+	}
+
+	data += offset;
+
+	std::memcpy(&header.data, data, data_header::spec_sz);
+
+	offset += data_header::spec_sz;
+
+	(void)data;
+	(void)size;
 
 	return true;
 }
@@ -151,43 +161,18 @@ bool load_wav_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 		err = "ERROR : No data to load from.";
 		return false;
 	}
-	if(data_size <= sizeof(wav_header))
-	{
-		err = "ERROR : No data to load from.";
-		return false;
-	}
 
+	size_t offset = 0;
 	wav_header header;
-	if(!read_header(header, data))
+	if(!read_header(header, data, data_size, offset))
 	{
 		err = "ERROR : Incorrect wav header";
 		return false;
 	}
-	// According to the Cannonical WAVE file format
-	// all sub headers are in big-endian so we convert them to little
-	convert_to_little_endian(header);
 
-	if(std::memcmp(header.riff.header, "RIFF", 4) != 0)
+	if(header.data.data_bytes == 0)
 	{
-		err = "ERROR : Bad RIFF header.";
-		return false;
-	}
-
-	if(std::memcmp(header.riff.wave_header, "WAVE", 4) != 0)
-	{
-		err = "ERROR: This file is not wav format!";
-		return false;
-	}
-
-	if(std::memcmp(header.format.header, "fmt ", 4) != 0)
-	{
-		err = "ERROR: This file is not wav format!";
-		return false;
-	}
-
-	if(std::memcmp(header.data.header, "data", 4) != 0)
-	{
-		err = "ERROR: This file is not wav format!";
+		err = "ERROR : No data to load from.";
 		return false;
 	}
 
@@ -195,11 +180,13 @@ bool load_wav_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 	result.info.duration = sound_info::duration_t(sound_info::duration_t::rep(header.data.data_bytes) /
 												  sound_info::duration_t::rep(header.format.byte_rate));
 
-	result.data.resize(std::size_t(header.data.data_bytes));
 	result.info.bytes_per_sample = std::uint8_t(header.format.bit_depth) / 8;
-
-	std::memcpy(result.data.data(), data + wav_header::spec_sz, result.data.size());
 	result.info.channels = std::uint8_t(header.format.num_channels);
+
+	// offset to the samples
+	data += offset;
+	result.data.resize(std::size_t(header.data.data_bytes));
+	std::memcpy(result.data.data(), data, result.data.size());
 
 	return true;
 }
