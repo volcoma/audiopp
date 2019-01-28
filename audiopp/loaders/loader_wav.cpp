@@ -120,29 +120,19 @@ static bool read_header(wav_header& header, const std::uint8_t* data, size_t siz
         return false;
     }
 
-    data += riff_header::spec_sz;
-    size -= offset + riff_header::spec_sz;
-
     if(!get_chunk_offset(data, size, "fmt ", offset))
     {
         return false;
     }
 
-    data += offset;
-
-    std::memcpy(&header.format, data, format_header::spec_sz);
-
-    data += format_header::spec_sz;
-    size -= offset + format_header::spec_sz;
+    std::memcpy(&header.format, data + offset, format_header::spec_sz);
 
     if(!get_chunk_offset(data, size, "data", offset))
     {
         return false;
     }
 
-    data += offset;
-
-    std::memcpy(&header.data, data, data_header::spec_sz);
+    std::memcpy(&header.data, data + offset, data_header::spec_sz);
 
     offset += data_header::spec_sz;
 
