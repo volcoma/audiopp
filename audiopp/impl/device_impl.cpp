@@ -111,14 +111,9 @@ device_impl::device_impl(int devnum)
 		log_error("Cant open audio playback device: " + device_id_);
 		throw audio::exception("Cant open audio playback device: " + device_id_);
 	}
-	bool has_efx = openal::al_has_extension(device_.get(), "ALC_EXT_EFX");
-
-	ALint attribs[4] = {0};
-	attribs[0] = ALC_MAX_AUXILIARY_SENDS;
-	attribs[1] = 4;
 
 	// create context
-	context_.reset(alcCreateContext(device_.get(), has_efx ? attribs : nullptr));
+	context_.reset(alcCreateContext(device_.get(), nullptr));
 
 	if(context_ == nullptr)
 	{

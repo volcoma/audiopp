@@ -29,11 +29,19 @@ auto read_stream_into_container(std::basic_istream<CharT, Traits>& in,
 		throw std::ios_base::failure{"error"};
 	};
 
-	if(!in.ignore(std::numeric_limits<std::streamsize>::max()))
+	if(!in.seekg(0, std::ios_base::end))
 	{
 		throw std::ios_base::failure{"error"};
 	};
-	auto const char_count = in.gcount();
+
+	auto const end_pos = in.tellg();
+
+	if(std::streamsize(-1) == end_pos)
+	{
+		throw std::ios_base::failure{"error"};
+	};
+
+	auto const char_count = end_pos - start_pos;
 
 	if(!in.seekg(start_pos))
 	{

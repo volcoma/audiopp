@@ -70,9 +70,11 @@ sound_impl::sound_impl(std::vector<std::uint8_t>&& buffer, const sound_info& inf
 		return;
 	}
 
+	buf_size_ = buf_.size() - buf_offset_;
+
 	if(stream)
 	{
-		load_buffer(CHUNK_SIZE);
+		load_buffer();
 	}
 	else
 	{
@@ -85,36 +87,38 @@ bool sound_impl::load_buffer()
 	return load_buffer(CHUNK_SIZE);
 }
 
-bool sound_impl::load_buffer(const size_t chunk_size)
+bool sound_impl::load_buffer(size_t chunk_size)
 {
 	if(buf_.empty())
+	{
 		return false;
+	}
 
 	ALenum format = detail::get_format_for_channels(buf_info_.channels, buf_info_.bytes_per_sample);
 
-	size_t size = buf_.size() - buf_ptr_;
-	if(size > chunk_size)
-	{
-		size = chunk_size;
-	}
+	size_t size = std::min(buf_.size() - buf_offset_, chunk_size);
 
 	native_handle_type h = 0;
 	al_check(alGenBuffers(1, &h));
-	al_check(alBufferData(h, format, buf_.data() + buf_ptr_, ALsizei(size), ALsizei(buf_info_.sample_rate)));
+	al_check(
+		alBufferData(h, format, buf_.data() + buf_offset_, ALsizei(size), ALsizei(buf_info_.sample_rate)));
 	handles_.push_back(h);
 
-	buf_ptr_ += size;
+	buf_offset_ += size;
 
-	if(buf_ptr_ == buf_.size())
+	{
+		std::lock_guard<std::mutex> lock(mutex_);
+		for(auto source : bound_to_sources_)
+		{
+			// enqueue the newly created buffer
+			source->enqueue_buffers(&handles_.back(), 1);
+		}
+	}
+
+	if(buf_offset_ == buf_.size())
 	{
 		// force deallocate
 		std::vector<std::uint8_t>().swap(buf_);
-	}
-
-	std::lock_guard<std::mutex> lock(mutex_);
-	for(auto source : bound_to_sources_)
-	{
-		source->enqueue_buffer(h);
 	}
 
 	return true;
@@ -137,6 +141,11 @@ bool sound_impl::is_valid() const
 	return !handles_.empty();
 }
 
+const std::vector<sound_impl::native_handle_type>& sound_impl::native_handles() const
+{
+	return handles_;
+}
+
 void sound_impl::bind_to_source(source_impl* source)
 {
 	std::lock_guard<std::mutex> lock(mutex_);
@@ -153,11 +162,10 @@ void sound_impl::unbind_from_source(source_impl* source)
 
 void sound_impl::unbind_from_all_sources()
 {
-    auto all_sources = [&]()
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        return std::move(bound_to_sources_);
-    }();
+	auto all_sources = [&]() {
+		std::lock_guard<std::mutex> lock(mutex_);
+		return std::move(bound_to_sources_);
+	}();
 
 	for(auto& source : all_sources)
 	{
@@ -168,17 +176,5 @@ void sound_impl::unbind_from_all_sources()
 	}
 }
 
-void sound_impl::cleanup()
-{
-	if(!handles_.empty())
-	{
-		al_check(alDeleteBuffers(ALsizei(handles_.size()), handles_.data()));
-		handles_.clear();
-		buf_.clear();
-		buf_ptr_ = 0;
-	}
-
-	unbind_from_all_sources();
-}
 } // namespace detail
 } // namespace audio

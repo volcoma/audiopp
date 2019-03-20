@@ -30,14 +30,14 @@ bool source_impl::create()
 
 	al_check(alGenSources(1, &handle_));
 
-	return handle_ != 0;
+	return is_valid();
 }
 
 bool source_impl::bind(sound_impl* sound)
 {
 	if(sound == nullptr)
 	{
-		return true;
+		return false;
 	}
 
 	unbind();
@@ -48,7 +48,8 @@ bool source_impl::bind(sound_impl* sound)
 
 	al_check(alSourcei(handle_, AL_SOURCE_RELATIVE, AL_FALSE));
 	al_check(alSourcei(handle_, AL_BUFFER, 0));
-	alSourceQueueBuffers(handle_, ALsizei(handles.size()), handles.data());
+
+	enqueue_buffers(handles.data(), handles.size());
 
 	return true;
 }
@@ -62,6 +63,10 @@ bool source_impl::has_binded_sound() const
 
 void source_impl::unbind()
 {
+	if(!is_bound())
+	{
+		return;
+	}
 	stop();
 
 	ALint queued = 0;
@@ -71,6 +76,8 @@ void source_impl::unbind()
 		ALuint buffer = 0;
 		al_check(alSourceUnqueueBuffers(handle_, 1, &buffer));
 	}
+
+	al_check(alSourcei(handle_, AL_BUFFER, 0));
 
 	unbind_sound();
 }
@@ -125,7 +132,7 @@ void source_impl::play() const
 
 void source_impl::stop() const
 {
-    set_loop(false);
+	set_loop(false);
 	al_check(alSourceStop(handle_));
 }
 
@@ -155,7 +162,7 @@ bool source_impl::is_stopped() const
 	return (state == AL_STOPPED);
 }
 
-bool source_impl::is_binded() const
+bool source_impl::is_bound() const
 {
 	ALint buffer = 0;
 	al_check(alGetSourcei(handle_, AL_BUFFER, &buffer));
@@ -232,11 +239,6 @@ void source_impl::update_stream()
 	}
 }
 
-void source_impl::enqueue_buffer(source_impl::native_handle_type h)
-{
-    al_check(alSourceQueueBuffers(handle_, 1, &h));
-}
-
 source_impl::native_handle_type source_impl::native_handle() const
 {
 	return handle_;
@@ -245,6 +247,11 @@ source_impl::native_handle_type source_impl::native_handle() const
 uintptr_t source_impl::get_bound_sound_uid() const
 {
 	return reinterpret_cast<uintptr_t>(bound_sound_);
+}
+
+void source_impl::enqueue_buffers(const native_handle_type* handles, size_t count) const
+{
+	al_check(alSourceQueueBuffers(handle_, ALsizei(count), handles));
 }
 
 void source_impl::bind_sound(sound_impl* sound)

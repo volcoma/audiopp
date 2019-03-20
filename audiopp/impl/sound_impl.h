@@ -26,28 +26,25 @@ public:
 
 	bool is_valid() const;
 
-	const std::vector<native_handle_type>& native_handles() const
-	{
-		return handles_;
-	}
+	const std::vector<native_handle_type>& native_handles() const;
 
 	bool load_buffer();
 
 private:
 	friend class source_impl;
 
-	bool load_buffer(const size_t chunk_size);
+	bool load_buffer(size_t chunk_size);
 
 	void bind_to_source(source_impl* source);
 	void unbind_from_source(source_impl* source);
 	void unbind_from_all_sources();
-	void cleanup();
 
 	std::vector<native_handle_type> handles_;
 
 	// transient data valid until the audio is being streamed from memory
 	std::vector<std::uint8_t> buf_;
-	size_t buf_ptr_ = 0;
+	size_t buf_offset_ = 0;
+	size_t buf_size_ = 0;
 	sound_info buf_info_;
 
 	/// openal doesn't let us destroy sounds that are

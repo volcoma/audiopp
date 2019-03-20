@@ -49,12 +49,12 @@ public:
 	bool is_playing() const;
 	bool is_paused() const;
 	bool is_stopped() const;
-	bool is_binded() const;
+	bool is_bound() const;
 	bool is_valid() const;
 	bool is_looping() const;
 
 	void update_stream();
-	void enqueue_buffer(native_handle_type h);
+	void enqueue_buffers(const native_handle_type* handles, size_t count) const;
 
 	native_handle_type native_handle() const;
 
