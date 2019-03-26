@@ -24,9 +24,9 @@ public:
 	source_impl(const source_impl& rhs) = delete;
 	source_impl& operator=(const source_impl& rhs) = delete;
 
-	bool create();
-	bool bind(sound_impl* sound);
-	bool has_binded_sound() const;
+	auto create() -> bool;
+	auto bind(sound_impl* sound) -> bool;
+	auto has_binded_sound() const -> bool;
 	void unbind();
 	void purge();
 
@@ -40,34 +40,34 @@ public:
 	void set_volume_rolloff(float rolloff) const;
 	void set_distance(float mind, float maxd) const;
 	void set_playing_offset(float seconds);
-	float get_playing_offset() const;
-	float get_playing_duration() const;
+	auto get_playing_offset() const -> float;
+	auto get_playing_duration() const -> float;
 
 	void play() const;
 	void stop() const;
 	void pause() const;
-	bool is_playing() const;
-	bool is_paused() const;
-	bool is_stopped() const;
-	bool is_bound() const;
-	bool is_valid() const;
-	bool is_looping() const;
+	auto is_playing() const -> bool;
+	auto is_paused() const -> bool;
+	auto is_stopped() const -> bool;
+	auto is_bound() const -> bool;
+	auto is_valid() const -> bool;
+	auto is_looping() const -> bool;
 
-	void update_stream();
-	void enqueue_buffers(const native_handle_type* handles, size_t count) const;
 
-	native_handle_type native_handle() const;
+    auto update_stream() -> bool;
+	auto native_handle() const -> native_handle_type;
+    auto get_bound_sound_uid() const -> uintptr_t;
 
-	uintptr_t get_bound_sound_uid() const;
+    void enqueue_buffers(const native_handle_type* handles, size_t count) const;
 
 private:
 	void bind_sound(sound_impl* sound);
 	void unbind_sound();
 
-	native_handle_type handle_ = 0;
-
 	/// non owning
 	sound_impl* bound_sound_ = nullptr;
+
+	native_handle_type handle_ = 0;
 };
 } // namespace detail
 } // namespace audio

@@ -6,7 +6,7 @@ namespace audio
 
 namespace
 {
-static const std::string& get_empty()
+static auto get_empty() -> const std::string&
 {
 	static std::string empty;
 	return empty;
@@ -36,12 +36,12 @@ void device::disable()
 	}
 }
 
-bool device::is_valid() const
+auto device::is_valid() const -> bool
 {
 	return impl_ && impl_->is_valid();
 }
 
-const std::string& device::get_device_id() const
+auto device::get_device_id() const -> const std::string&
 {
 	if(impl_)
 	{
@@ -50,7 +50,7 @@ const std::string& device::get_device_id() const
 	return get_empty();
 }
 
-const std::string& device::get_vendor() const
+auto device::get_vendor() const -> const std::string&
 {
 	if(impl_)
 	{
@@ -59,7 +59,7 @@ const std::string& device::get_vendor() const
 	return get_empty();
 }
 
-const std::string& device::get_version() const
+auto device::get_version() const -> const std::string&
 {
 	if(impl_)
 	{
@@ -68,7 +68,7 @@ const std::string& device::get_version() const
 	return get_empty();
 }
 
-const std::string& device::get_extensions() const
+auto device::get_extensions() const -> const std::string&
 {
 	if(impl_)
 	{
@@ -77,12 +77,12 @@ const std::string& device::get_extensions() const
 	return get_empty();
 }
 
-std::vector<std::string> device::enumerate_playback_devices()
+auto device::enumerate_playback_devices() -> std::vector<std::string>
 {
 	return detail::device_impl::enumerate_playback_devices();
 }
 
-std::vector<std::string> device::enumerate_capture_devices()
+auto device::enumerate_capture_devices() -> std::vector<std::string>
 {
 	return detail::device_impl::enumerate_capture_devices();
 }

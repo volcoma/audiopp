@@ -5,63 +5,92 @@ namespace audio
 {
 namespace utils
 {
-std::vector<std::uint8_t> convert_to_mono(const std::vector<std::uint8_t>& input,
-										  std::uint8_t bytes_per_sample)
+
+template <typename SampleType>
+auto convert_to_mono(const std::vector<std::uint8_t>& stereo_samples, std::uint8_t bytes_per_sample)
+	-> std::vector<std::uint8_t>
 {
 	if(bytes_per_sample > 2)
 	{
 		log_error("Sound buffer is not 8/16 bits per sample. Unsupported");
-		return input;
+		return stereo_samples;
+	}
+
+	if(sizeof(SampleType) != bytes_per_sample)
+	{
+		log_error("Requested sample type is not the proper size");
+		return stereo_samples;
+	}
+
+	const auto input_size = stereo_samples.size();
+	if(input_size % bytes_per_sample != 0)
+	{
+		log_error("Sound buffer is not the proper size");
+		return stereo_samples;
 	}
 
 	std::vector<std::uint8_t> output;
-	output.reserve(input.size() / 2);
+	output.reserve(input_size / 2);
 
-	if(bytes_per_sample == 1)
+	for(std::size_t i = 0; i < input_size; i += 2 * bytes_per_sample)
 	{
-		for(std::size_t i = 0, sz = input.size(); i < sz; i += 2 * bytes_per_sample)
-		{
-			const std::uint8_t left = input[i];
-			const std::uint8_t right = input[i + bytes_per_sample];
-			const auto mono_sample = std::uint8_t((int(left) + right) / 2);
+		const auto left_sample = *reinterpret_cast<const SampleType*>(&stereo_samples[i]);
+		const auto right_sample = *reinterpret_cast<const SampleType*>(&stereo_samples[i + bytes_per_sample]);
+		const auto stereo_sample = int(left_sample) + int(right_sample);
+		const auto mono_sample = SampleType(stereo_sample / 2);
 
-			output.push_back(mono_sample);
+		for(size_t j = 0; j < bytes_per_sample; ++j)
+		{
+			const auto sample_part = std::uint8_t(mono_sample >> (j * 8)) & 0xff;
+			output.emplace_back(sample_part);
 		}
 	}
-	else if(bytes_per_sample == 2)
-	{
-		for(std::size_t i = 0, sz = input.size(); i < sz; i += 2 * bytes_per_sample)
-		{
-			const std::int16_t left = *reinterpret_cast<const std::int16_t*>(&input[i]);
-			const std::int16_t right = *reinterpret_cast<const std::int16_t*>(&input[i + bytes_per_sample]);
-			const auto mono_sample = std::int16_t((int(left) + right) / 2);
 
-			const auto sample_part1 = std::uint8_t(mono_sample >> 0);
-			const auto sample_part2 = std::uint8_t(mono_sample >> 8);
-			output.push_back(sample_part1);
-			output.push_back(sample_part2);
-		}
-	}
 	return output;
 }
 
-std::vector<std::uint8_t> convert_to_stereo(const std::vector<std::uint8_t>& input,
-											std::uint8_t bytes_per_sample)
+auto convert_to_mono(const std::vector<std::uint8_t>& stereo_samples, std::uint8_t bytes_per_sample)
+	-> std::vector<std::uint8_t>
+{
+	if(bytes_per_sample == 1)
+	{
+		return convert_to_mono<std::uint8_t>(stereo_samples, bytes_per_sample);
+	}
+	else if(bytes_per_sample == 2)
+	{
+		return convert_to_mono<std::int16_t>(stereo_samples, bytes_per_sample);
+	}
+	return stereo_samples;
+}
+
+auto convert_to_stereo(const std::vector<std::uint8_t>& mono_samples, std::uint8_t bytes_per_sample)
+	-> std::vector<std::uint8_t>
 {
 	if(bytes_per_sample > 2)
 	{
 		log_error("Sound buffer is not 8/16 bits per sample");
-		return input;
+		return mono_samples;
+	}
+
+	const auto input_size = mono_samples.size();
+	if(input_size % bytes_per_sample != 0)
+	{
+		log_error("Sound buffer is not the proper size");
+		return mono_samples;
 	}
 
 	std::vector<std::uint8_t> output;
-	output.resize(input.size() * 2, 0);
+	output.resize(input_size * 2);
 
-	for(std::size_t i = 0, sz = input.size(); i < sz; i += bytes_per_sample)
+	for(std::size_t i = 0; i < input_size; i += bytes_per_sample)
 	{
 		const std::size_t dst_idx = i * 2;
-		std::memcpy(output.data() + dst_idx, input.data() + i, bytes_per_sample);
-		std::memcpy(output.data() + dst_idx + bytes_per_sample, input.data() + i, bytes_per_sample);
+		const uint8_t* mono_sample = mono_samples.data() + i;
+		uint8_t* dst_part1 = output.data() + dst_idx;
+		uint8_t* dst_part2 = dst_part1 + bytes_per_sample;
+
+		std::memcpy(dst_part1, mono_sample, bytes_per_sample);
+		std::memcpy(dst_part2, mono_sample, bytes_per_sample);
 	}
 
 	return output;

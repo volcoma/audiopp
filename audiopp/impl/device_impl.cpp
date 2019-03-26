@@ -16,12 +16,12 @@ namespace detail
 
 namespace openal
 {
-static bool al_has_extension(ALCdevice* dev, const char* ext)
+static auto al_has_extension(ALCdevice* dev, const char* ext) -> bool
 {
 	return (alcIsExtensionPresent(dev, ext) == AL_TRUE); // ALC_TRUE
 }
 
-static std::vector<std::string> al_get_strings(ALCdevice* dev, ALenum e)
+static auto al_get_strings(ALCdevice* dev, ALenum e) -> std::vector<std::string>
 {
 	std::vector<std::string> result;
 
@@ -36,7 +36,7 @@ static std::vector<std::string> al_get_strings(ALCdevice* dev, ALenum e)
 	return result;
 }
 
-static std::string al_version()
+static auto al_version() -> std::string
 {
 	std::stringstream ss;
 	auto version = alGetString(AL_VERSION);
@@ -58,7 +58,7 @@ static std::string al_vendor()
 	return ss.str();
 }
 
-static std::string al_extensions()
+static auto al_extensions() -> std::string
 {
 	std::stringstream ss;
 	auto extensions = alGetString(AL_EXTENSIONS);
@@ -69,7 +69,7 @@ static std::string al_extensions()
 	return ss.str();
 }
 
-static std::string alc_extensions()
+static auto alc_extensions() -> std::string
 {
 	std::stringstream ss;
 	auto extensions = alcGetString(nullptr, ALC_EXTENSIONS);
@@ -147,17 +147,17 @@ void device_impl::disable()
 	al_check(alcMakeContextCurrent(nullptr));
 }
 
-bool device_impl::is_valid() const
+auto device_impl::is_valid() const -> bool
 {
 	return (device_ != nullptr) && (context_ != nullptr);
 }
 
-const std::string& device_impl::get_device_id() const
+auto device_impl::get_device_id() const -> const std::string&
 {
 	return device_id_;
 }
 
-const std::string& device_impl::get_version() const
+auto device_impl::get_version() const -> const std::string&
 {
 	return version_;
 }
@@ -167,12 +167,12 @@ const std::string& device_impl::get_vendor() const
 	return vendor_;
 }
 
-const std::string& device_impl::get_extensions() const
+auto device_impl::get_extensions() const -> const std::string&
 {
 	return extensions_;
 }
 
-std::vector<std::string> device_impl::enumerate_capture_devices()
+auto device_impl::enumerate_capture_devices() -> std::vector<std::string>
 {
 	bool can_enumerate = openal::al_has_extension(nullptr, "ALC_ENUMERATION_EXT");
 
@@ -184,7 +184,7 @@ std::vector<std::string> device_impl::enumerate_capture_devices()
 	return {};
 }
 
-std::vector<std::string> device_impl::enumerate_playback_devices()
+auto device_impl::enumerate_playback_devices() -> std::vector<std::string>
 {
 	bool can_enumerate = openal::al_has_extension(nullptr, "ALC_ENUMERATION_EXT");
 

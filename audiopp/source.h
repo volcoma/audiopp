@@ -33,7 +33,7 @@ public:
 	//-----------------------------------------------------------------------------
 	/// Checks whether this source has a sound binded to it.
 	//-----------------------------------------------------------------------------
-	bool has_binded_sound() const;
+	auto has_binded_sound() const -> bool;
 
 	//-----------------------------------------------------------------------------
 	/// Specifies whether source is looping.
@@ -90,12 +90,12 @@ public:
 	//-----------------------------------------------------------------------------
 	/// Gets the source buffer position, in seconds.
 	//-----------------------------------------------------------------------------
-	sound_info::duration_t get_playing_offset() const;
+	auto get_playing_offset() const -> sound_info::duration_t;
 
 	//-----------------------------------------------------------------------------
 	/// Gets the source buffer length, in seconds.
 	//-----------------------------------------------------------------------------
-	sound_info::duration_t get_playing_duration() const;
+	auto get_playing_duration() const -> sound_info::duration_t;
 
 	//-----------------------------------------------------------------------------
 	/// Play, replay, or resume a Source.
@@ -115,27 +115,27 @@ public:
 	//-----------------------------------------------------------------------------
 	/// Checks whether a source is currently playing.
 	//-----------------------------------------------------------------------------
-	bool is_playing() const;
+	auto is_playing() const -> bool;
 
 	//-----------------------------------------------------------------------------
 	/// Checks whether a source is currently paused.
 	//-----------------------------------------------------------------------------
-	bool is_paused() const;
+	auto is_paused() const -> bool;
 
 	//-----------------------------------------------------------------------------
 	/// Checks whether a source is currently stopped.
 	//-----------------------------------------------------------------------------
-	bool is_stopped() const;
+	auto is_stopped() const -> bool;
 
 	//-----------------------------------------------------------------------------
 	/// Checks whether a source is currently looping.
 	//-----------------------------------------------------------------------------
-	bool is_looping() const;
+	auto is_looping() const -> bool;
 
 	//-----------------------------------------------------------------------------
 	/// Checks whether a source is valid.
 	//-----------------------------------------------------------------------------
-	bool is_valid() const;
+	auto is_valid() const -> bool;
 
 	//-----------------------------------------------------------------------------
 	/// Updates the stream. Does nothing if there is no streaming
@@ -145,7 +145,7 @@ public:
 	//-----------------------------------------------------------------------------
 	/// Gets the bound sound uid or 0 if none exists
 	//-----------------------------------------------------------------------------
-	uintptr_t get_bound_sound_uid() const;
+	auto get_bound_sound_uid() const -> uintptr_t;
 
 private:
 	/// pimpl idiom

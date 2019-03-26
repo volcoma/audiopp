@@ -3,6 +3,7 @@
 #include "check.h"
 #include "source_impl.h"
 #include <algorithm>
+#include <cstring>
 
 namespace audio
 {
@@ -11,7 +12,7 @@ namespace detail
 
 namespace detail
 {
-static ALenum get_format_for_channels(std::uint32_t channels, std::uint32_t bytes_per_sample)
+static auto get_format_for_channels(std::uint32_t channels, std::uint32_t bytes_per_sample) -> ALenum
 {
 	ALenum format = 0;
 	switch(channels)
@@ -59,72 +60,21 @@ static ALenum get_format_for_channels(std::uint32_t channels, std::uint32_t byte
 }
 } // namespace detail
 
-static const size_t CHUNK_SIZE = 64 * 1024; // size of buffer if streaming
+constexpr static const size_t CHUNK_SIZE = 64 * 1024; // size of buffer if streaming
 
+sound_impl::sound_impl() = default;
 sound_impl::sound_impl(std::vector<std::uint8_t>&& buffer, const sound_info& info, bool stream /*= false*/)
-	: buf_(std::move(buffer))
-	, buf_info_(info)
+	: data_(std::move(buffer))
+	, info_(info)
+	, stream_(stream)
 {
-	if(buf_.empty())
+	if(data_.empty())
 	{
 		return;
 	}
 
-	buf_size_ = buf_.size() - buf_offset_;
-
-	if(stream)
-	{
-		load_buffer();
-	}
-	else
-	{
-		load_buffer(buf_.size());
-	}
+	load_chunk();
 }
-
-bool sound_impl::load_buffer()
-{
-	return load_buffer(CHUNK_SIZE);
-}
-
-bool sound_impl::load_buffer(size_t chunk_size)
-{
-	if(buf_.empty())
-	{
-		return false;
-	}
-
-	ALenum format = detail::get_format_for_channels(buf_info_.channels, buf_info_.bytes_per_sample);
-
-	size_t size = std::min(buf_.size() - buf_offset_, chunk_size);
-
-	native_handle_type h = 0;
-	al_check(alGenBuffers(1, &h));
-	al_check(
-		alBufferData(h, format, buf_.data() + buf_offset_, ALsizei(size), ALsizei(buf_info_.sample_rate)));
-	handles_.push_back(h);
-
-	buf_offset_ += size;
-
-	{
-		std::lock_guard<std::mutex> lock(mutex_);
-		for(auto source : bound_to_sources_)
-		{
-			// enqueue the newly created buffer
-			source->enqueue_buffers(&handles_.back(), 1);
-		}
-	}
-
-	if(buf_offset_ == buf_.size())
-	{
-		// force deallocate
-		std::vector<std::uint8_t>().swap(buf_);
-	}
-
-	return true;
-}
-
-sound_impl::sound_impl() = default;
 
 sound_impl::~sound_impl()
 {
@@ -136,12 +86,71 @@ sound_impl::~sound_impl()
 	}
 }
 
-bool sound_impl::is_valid() const
+auto sound_impl::load_chunk() -> bool
+{
+	if(stream_)
+	{
+		return load_chunk(CHUNK_SIZE);
+	}
+
+	return load_chunk(data_.size());
+}
+
+auto sound_impl::load_chunk(size_t chunk_size) -> bool
+{
+	if(data_.empty())
+	{
+		return false;
+	}
+	size_t actual_size = std::min(data_.size() - data_offset_, chunk_size);
+
+	ALenum format = detail::get_format_for_channels(info_.channels, info_.bytes_per_sample);
+
+	native_handle_type h = 0;
+	al_check(alGenBuffers(1, &h));
+	al_check(alBufferData(h, format, data_.data() + data_offset_, ALsizei(actual_size),
+						  ALsizei(info_.sample_rate)));
+	handles_.emplace_back(h);
+
+	data_offset_ += actual_size;
+
+	{
+		std::lock_guard<std::mutex> lock(mutex_);
+		for(auto source : bound_to_sources_)
+		{
+			// enqueue the newly created buffer
+			source->enqueue_buffers(&handles_.back(), 1);
+		}
+	}
+
+	if(data_offset_ == data_.size())
+	{
+		// force deallocate
+		std::vector<uint8_t>().swap(data_);
+		data_offset_ = 0;
+	}
+
+	return true;
+}
+
+auto sound_impl::get_info() const -> const sound_info&
+{
+	return info_;
+}
+
+void sound_impl::append_chunk(const std::vector<uint8_t>& data)
+{
+	auto offset = data_.size();
+	data_.resize(data_.size() + data.size());
+	std::memcpy(data_.data() + offset, data.data(), data.size());
+}
+
+auto sound_impl::is_valid() const -> bool
 {
 	return !handles_.empty();
 }
 
-const std::vector<sound_impl::native_handle_type>& sound_impl::native_handles() const
+auto sound_impl::native_handles() const -> const std::vector<native_handle_type>&
 {
 	return handles_;
 }

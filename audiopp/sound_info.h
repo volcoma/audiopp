@@ -21,6 +21,5 @@ struct sound_info
 
 	/// channel count of the sound. e.g mono/stereo
 	std::uint8_t channels = 0;
-
 };
 } // namespace audio

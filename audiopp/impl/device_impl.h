@@ -19,15 +19,15 @@ public:
 	void enable();
 	void disable();
 
-	bool is_valid() const;
+	auto is_valid() const -> bool;
 
-	const std::string& get_device_id() const;
-	const std::string& get_version() const;
-	const std::string& get_vendor() const;
-	const std::string& get_extensions() const;
+	auto get_device_id() const -> const std::string&;
+	auto get_version() const -> const std::string&;
+	auto get_vendor() const -> const std::string&;
+	auto get_extensions() const -> const std::string&;
 
-	static std::vector<std::string> enumerate_playback_devices();
-	static std::vector<std::string> enumerate_capture_devices();
+	static auto enumerate_playback_devices() -> std::vector<std::string>;
+	static auto enumerate_capture_devices() -> std::vector<std::string>;
 
 private:
 	struct deleter

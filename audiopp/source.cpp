@@ -37,7 +37,7 @@ void source::pause()
 	}
 }
 
-bool source::is_playing() const
+auto source::is_playing() const -> bool
 {
 	if(is_valid())
 	{
@@ -46,7 +46,7 @@ bool source::is_playing() const
 	return false;
 }
 
-bool source::is_paused() const
+auto source::is_paused() const -> bool
 {
 	if(is_valid())
 	{
@@ -55,7 +55,7 @@ bool source::is_paused() const
 	return false;
 }
 
-bool source::is_stopped() const
+auto source::is_stopped() const -> bool
 {
 	if(is_valid())
 	{
@@ -64,7 +64,7 @@ bool source::is_stopped() const
 	return true;
 }
 
-bool source::is_looping() const
+auto source::is_looping() const -> bool
 {
 	if(is_valid())
 	{
@@ -147,25 +147,25 @@ void source::set_playing_offset(sound_info::duration_t offset)
 	}
 }
 
-sound_info::duration_t source::get_playing_offset() const
+auto source::get_playing_offset() const -> sound_info::duration_t
 {
 	if(is_valid())
 	{
 		return sound_info::duration_t(impl_->get_playing_offset());
 	}
-	return sound_info::duration_t(0);
+	return sound_info::duration_t::zero();
 }
 
-sound_info::duration_t source::get_playing_duration() const
+auto source::get_playing_duration() const -> sound_info::duration_t
 {
 	if(is_valid())
 	{
 		return sound_info::duration_t(impl_->get_playing_duration());
 	}
-	return sound_info::duration_t(0);
+	return sound_info::duration_t::zero();
 }
 
-bool source::is_valid() const
+auto source::is_valid() const -> bool
 {
 	return impl_ && impl_->is_valid();
 }
@@ -178,7 +178,7 @@ void source::update_stream()
 	}
 }
 
-uintptr_t source::get_bound_sound_uid() const
+auto source::get_bound_sound_uid() const -> uintptr_t
 {
 	return impl_ ? impl_->get_bound_sound_uid() : 0;
 }
@@ -191,7 +191,7 @@ void source::bind(const sound& snd)
 	}
 }
 
-bool source::has_binded_sound() const
+auto source::has_binded_sound() const -> bool
 {
 	if(is_valid())
 	{

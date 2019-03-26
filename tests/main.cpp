@@ -1,6 +1,7 @@
 #include "audiopp/library.h"
 #include "audiopp/loaders/loader.h"
 
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -25,6 +26,20 @@ void add_expected_info(std::vector<test_info>& infos, const std::string& file, u
 	infos.emplace_back(info);
 }
 
+void check_conversions(audio::sound_data& data)
+{
+	auto og = data.data;
+	data.convert_to_opposite();
+	data.convert_to_opposite();
+	std::vector<uint8_t> diff;
+	std::set_difference(og.begin(), og.end(), data.data.begin(), data.data.end(),
+						std::inserter(diff, diff.begin()));
+	if(!diff.empty())
+	{
+		audio::log_info("different after convert");
+	}
+}
+
 int main()
 {
 	audio::set_info_logger([](const std::string& msg) { std::cout << msg << std::endl; });
@@ -32,7 +47,7 @@ int main()
 	try
 	{
 		// initialize the audio device
-		audio::device device;
+		audio::device device(-1);
 
 		std::vector<test_info> infos;
 		add_expected_info(infos, DATA "17.wav", 44100, 2, 1);
@@ -84,6 +99,8 @@ int main()
 			audio::log_info("sample_rate : " + std::to_string(data.info.sample_rate));
 			audio::log_info("channels : " + std::to_string(data.info.channels));
 
+			// check_conversions(data);
+
 			loaded_sounds.emplace_back(std::move(data));
 		}
 		audio::log_info("------------------------------------------");
@@ -97,14 +114,15 @@ int main()
 			audio::log_info("sample_rate : " + std::to_string(data.info.sample_rate));
 			audio::log_info("channels : " + std::to_string(data.info.channels));
 
-			audio::sound sound(std::move(data));
+			auto og = data;
+			audio::sound sound(std::move(data), true);
 			audio::source source;
 
 			source.bind(sound);
 			source.play();
 			while(source.is_playing())
 			{
-				// source.update_stream();
+				source.update_stream();
 				std::this_thread::sleep_for(1667us);
 			}
 		}

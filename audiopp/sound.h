@@ -28,31 +28,33 @@ public:
 	//-----------------------------------------------------------------------------
 	/// Checks whether a sound is valid.
 	//-----------------------------------------------------------------------------
-	bool is_valid() const;
+	auto is_valid() const -> bool;
 
 	//-----------------------------------------------------------------------------
 	/// Gets the sound data info.
 	//-----------------------------------------------------------------------------
-	const sound_info& get_info() const;
+	auto get_info() const -> const sound_info&;
 
 	//-----------------------------------------------------------------------------
 	/// Loads the next chunk of the buffer if streaming is enabled.
 	/// If already loaded, it does nothing.
 	//-----------------------------------------------------------------------------
-	bool load_buffer();
+	auto load_chunk() -> bool;
+
+	//-----------------------------------------------------------------------------
+	/// Adds a pcm data chunk
+	//-----------------------------------------------------------------------------
+	void append_chunk(const std::vector<uint8_t>& data);
 
 	//-----------------------------------------------------------------------------
 	/// Unique identifier of this sound. 0 is invalid
 	//-----------------------------------------------------------------------------
-	uintptr_t uid() const;
+	auto uid() const -> uintptr_t;
 
 private:
 	friend class source;
 
 	/// pimpl idiom
 	std::unique_ptr<detail::sound_impl> impl_;
-
-	/// sound info
-	sound_info info_;
 };
 } // namespace audio

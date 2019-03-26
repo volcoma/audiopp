@@ -22,10 +22,15 @@ struct sound_data
 	//-----------------------------------------------------------------------------
 	void convert_to_stereo();
 
-	/// info about the sound
-	sound_info info;
+	//-----------------------------------------------------------------------------
+	/// Converts internal data to mono or stereo depending on its type.
+	//-----------------------------------------------------------------------------
+	void convert_to_opposite();
 
 	/// data buffer of pcm sound stored in uint8_t buffer
 	std::vector<std::uint8_t> data;
+
+	/// info about the sound
+	sound_info info;
 };
 } // namespace audio

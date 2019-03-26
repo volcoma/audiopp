@@ -21,7 +21,7 @@ source_impl::~source_impl()
 	purge();
 }
 
-bool source_impl::create()
+auto source_impl::create() -> bool
 {
 	if(handle_ != 0u)
 	{
@@ -33,7 +33,7 @@ bool source_impl::create()
 	return is_valid();
 }
 
-bool source_impl::bind(sound_impl* sound)
+auto source_impl::bind(sound_impl* sound) -> bool
 {
 	if(sound == nullptr)
 	{
@@ -54,7 +54,7 @@ bool source_impl::bind(sound_impl* sound)
 	return true;
 }
 
-bool source_impl::has_binded_sound() const
+auto source_impl::has_binded_sound() const -> bool
 {
 	ALint buffer = 0;
 	al_check(alGetSourcei(handle_, AL_BUFFERS_QUEUED, &buffer));
@@ -100,29 +100,26 @@ void source_impl::set_playing_offset(float seconds)
 {
 	// temporary load the whole sound here
 	// until we figure out a good way to load until the position we need it
-	if(bound_sound_)
-	{
-		while(bound_sound_->load_buffer())
-			;
-	}
+	while(update_stream())
+		;
 
 	al_check(alSourcef(handle_, AL_SEC_OFFSET, seconds));
 }
 
-float source_impl::get_playing_offset() const
+auto source_impl::get_playing_offset() const -> float
 {
 	ALfloat seconds = 0.0f;
 	al_check(alGetSourcef(handle_, AL_SEC_OFFSET, &seconds));
 	return static_cast<float>(seconds);
 }
 
-float source_impl::get_playing_duration() const
+auto source_impl::get_playing_duration() const -> float
 {
 	if(bound_sound_)
 	{
-		return float(bound_sound_->buf_info_.duration.count());
+		return float(bound_sound_->get_info().duration.count());
 	}
-	return 0;
+	return 0.0f;
 }
 
 void source_impl::play() const
@@ -141,28 +138,28 @@ void source_impl::pause() const
 	al_check(alSourcePause(handle_));
 }
 
-bool source_impl::is_playing() const
+auto source_impl::is_playing() const -> bool
 {
 	ALint state = AL_INITIAL;
 	al_check(alGetSourcei(handle_, AL_SOURCE_STATE, &state));
 	return (state == AL_PLAYING);
 }
 
-bool source_impl::is_paused() const
+auto source_impl::is_paused() const -> bool
 {
 	ALint state = AL_INITIAL;
 	al_check(alGetSourcei(handle_, AL_SOURCE_STATE, &state));
 	return (state == AL_PAUSED);
 }
 
-bool source_impl::is_stopped() const
+auto source_impl::is_stopped() const -> bool
 {
 	ALint state = AL_INITIAL;
 	al_check(alGetSourcei(handle_, AL_SOURCE_STATE, &state));
 	return (state == AL_STOPPED);
 }
 
-bool source_impl::is_bound() const
+auto source_impl::is_bound() const -> bool
 {
 	ALint buffer = 0;
 	al_check(alGetSourcei(handle_, AL_BUFFER, &buffer));
@@ -219,32 +216,34 @@ void source_impl::set_distance(float mind, float maxd) const
 	al_check(alSourcef(handle_, AL_MAX_DISTANCE, maxd));
 }
 
-bool source_impl::is_valid() const
+auto source_impl::is_valid() const -> bool
 {
 	return handle_ != 0;
 }
 
-bool source_impl::is_looping() const
+auto source_impl::is_looping() const -> bool
 {
 	ALint loop;
 	al_check(alGetSourcei(handle_, AL_LOOPING, &loop));
 	return loop != 0;
 }
 
-void source_impl::update_stream()
+auto source_impl::update_stream() -> bool
 {
 	if(bound_sound_)
 	{
-		bound_sound_->load_buffer();
+		return bound_sound_->load_chunk();
 	}
+
+	return false;
 }
 
-source_impl::native_handle_type source_impl::native_handle() const
+auto source_impl::native_handle() const -> native_handle_type
 {
 	return handle_;
 }
 
-uintptr_t source_impl::get_bound_sound_uid() const
+auto source_impl::get_bound_sound_uid() const -> uintptr_t
 {
 	return reinterpret_cast<uintptr_t>(bound_sound_);
 }

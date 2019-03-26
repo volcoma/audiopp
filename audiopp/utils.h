@@ -12,13 +12,13 @@ namespace utils
 //-----------------------------------------------------------------------------
 /// Converts an input buffer to mono
 //-----------------------------------------------------------------------------
-std::vector<std::uint8_t> convert_to_mono(const std::vector<std::uint8_t>& input,
-										  std::uint8_t bytes_per_sample);
+auto convert_to_mono(const std::vector<std::uint8_t>& stereo_samples, std::uint8_t bytes_per_sample)
+	-> std::vector<std::uint8_t>;
 
 //-----------------------------------------------------------------------------
 /// Converts an input buffer to stereo
 //-----------------------------------------------------------------------------
-std::vector<std::uint8_t> convert_to_stereo(const std::vector<std::uint8_t>& input,
-											std::uint8_t bytes_per_sample);
+auto convert_to_stereo(const std::vector<std::uint8_t>& mono_samples, std::uint8_t bytes_per_sample)
+	-> std::vector<std::uint8_t>;
 } // namespace utils
 } // namespace audio

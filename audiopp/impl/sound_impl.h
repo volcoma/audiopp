@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../sound_data.h"
+#include "../sound.h"
 #include "al.h"
 #include <mutex>
 
@@ -24,33 +24,36 @@ public:
 	sound_impl(const sound_impl& rhs) = delete;
 	sound_impl& operator=(const sound_impl& rhs) = delete;
 
-	bool is_valid() const;
+	auto is_valid() const -> bool;
+	auto native_handles() const -> const std::vector<native_handle_type>&;
+	auto load_chunk() -> bool;
+	auto load_chunk(size_t chunk_size) -> bool;
+	auto get_info() const -> const sound_info&;
 
-	const std::vector<native_handle_type>& native_handles() const;
-
-	bool load_buffer();
+	void append_chunk(const std::vector<uint8_t>& data);
 
 private:
 	friend class source_impl;
-
-	bool load_buffer(size_t chunk_size);
 
 	void bind_to_source(source_impl* source);
 	void unbind_from_source(source_impl* source);
 	void unbind_from_all_sources();
 
+	/// created buffer handles
 	std::vector<native_handle_type> handles_;
 
 	// transient data valid until the audio is being streamed from memory
-	std::vector<std::uint8_t> buf_;
-	size_t buf_offset_ = 0;
-	size_t buf_size_ = 0;
-	sound_info buf_info_;
+	std::vector<std::uint8_t> data_;
+	size_t data_offset_ = 0;
 
+	/// the sound info
+	sound_info info_;
 	/// openal doesn't let us destroy sounds that are
 	/// binded, so we have to keep this bookkeeping
 	std::mutex mutex_;
 	std::vector<source_impl*> bound_to_sources_;
+
+	bool stream_{};
 };
 } // namespace detail
 } // namespace audio

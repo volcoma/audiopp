@@ -4,12 +4,12 @@ namespace audio
 {
 namespace detail
 {
-logger_t& get_info_logger()
+auto get_info_logger() -> logger_t&
 {
 	static logger_t logger;
 	return logger;
 }
-logger_t& get_error_logger()
+auto get_error_logger() -> logger_t&
 {
 	static logger_t logger;
 	return logger;

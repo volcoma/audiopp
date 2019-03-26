@@ -58,6 +58,13 @@ void al_check_error(const char* file, unsigned int line, const char* expression)
 				description = "There is not enough memory left to execute the command.";
 				break;
 			}
+
+			default:
+			{
+				error = "UNKNOWN_ERROR : " + std::to_string(err);
+				description = "Unknown error.";
+				break;
+			}
 		}
 
 		// Log the error

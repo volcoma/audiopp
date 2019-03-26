@@ -35,37 +35,37 @@ public:
 	//-----------------------------------------------------------------------------
 	/// Checks whether the device and context are valid.
 	//-----------------------------------------------------------------------------
-	bool is_valid() const;
+	auto is_valid() const -> bool;
 
 	//-----------------------------------------------------------------------------
 	/// Gets the id of the selected device.
 	//-----------------------------------------------------------------------------
-	const std::string& get_device_id() const;
+	auto get_device_id() const -> const std::string&;
 
 	//-----------------------------------------------------------------------------
 	/// Gets vendor.
 	//-----------------------------------------------------------------------------
-	const std::string& get_vendor() const;
+	auto get_vendor() const -> const std::string&;
 
 	//-----------------------------------------------------------------------------
 	/// Gets get_version.
 	//-----------------------------------------------------------------------------
-	const std::string& get_version() const;
+	auto get_version() const -> const std::string&;
 
 	//-----------------------------------------------------------------------------
 	/// Gets available extensions.
 	//-----------------------------------------------------------------------------
-	const std::string& get_extensions() const;
+	auto get_extensions() const -> const std::string&;
 
 	//-----------------------------------------------------------------------------
 	/// Enumerate all playback devices available on the system.
 	//-----------------------------------------------------------------------------
-	static std::vector<std::string> enumerate_playback_devices();
+	static auto enumerate_playback_devices() -> std::vector<std::string>;
 
 	//-----------------------------------------------------------------------------
 	/// Enumerate all capture devices available on the system.
 	//-----------------------------------------------------------------------------
-	static std::vector<std::string> enumerate_capture_devices();
+	static auto enumerate_capture_devices() -> std::vector<std::string>;
 
 private:
 	/// pimpl idiom

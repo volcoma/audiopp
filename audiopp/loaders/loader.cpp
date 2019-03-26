@@ -8,7 +8,7 @@ namespace detail
 {
 template <typename Container = std::string, typename CharT = char, typename Traits = std::char_traits<char>>
 auto read_stream_into_container(std::basic_istream<CharT, Traits>& in,
-								typename Container::allocator_type alloc = {})
+								typename Container::allocator_type alloc = {}) -> Container
 {
 	static_assert(
 		// Allow only strings...
@@ -48,7 +48,7 @@ auto read_stream_into_container(std::basic_istream<CharT, Traits>& in,
 		throw std::ios_base::failure{"error"};
 	};
 
-	auto container = Container(std::move(alloc));
+	Container container(std::move(alloc));
 	container.resize(static_cast<std::size_t>(char_count));
 
 	if(!container.empty())
@@ -64,12 +64,12 @@ auto read_stream_into_container(std::basic_istream<CharT, Traits>& in,
 } // namespace detail
 using byte_array_t = std::vector<uint8_t>;
 
-byte_array_t read_stream(std::istream& stream)
+auto read_stream(std::istream& stream) -> byte_array_t
 {
 	return detail::read_stream_into_container<byte_array_t>(stream);
 }
 
-std::string get_extension(const std::string& path)
+auto get_extension(const std::string& path) -> std::string
 {
 	auto idx = path.rfind('.');
 
@@ -80,7 +80,7 @@ std::string get_extension(const std::string& path)
 	return {};
 }
 
-bool load_file(const std::string& path, byte_array_t& buffer)
+auto load_file(const std::string& path, byte_array_t& buffer) -> bool
 {
 	std::ifstream stream(path, std::ios::in | std::ios::binary);
 
@@ -93,7 +93,7 @@ bool load_file(const std::string& path, byte_array_t& buffer)
 	return true;
 }
 
-bool load_from_memory(const uint8_t* data, size_t size, sound_data& result, std::string& err)
+auto load_from_memory(const uint8_t* data, size_t size, sound_data& result, std::string& err) -> bool
 {
 	bool success = false;
 	if(!success)
@@ -107,7 +107,7 @@ bool load_from_memory(const uint8_t* data, size_t size, sound_data& result, std:
 	return success;
 }
 
-bool load_ogg_from_file(const std::string& path, sound_data& result, std::string& err)
+auto load_ogg_from_file(const std::string& path, sound_data& result, std::string& err) -> bool
 {
 	byte_array_t buffer;
 	if(!load_file(path, buffer))
@@ -118,7 +118,7 @@ bool load_ogg_from_file(const std::string& path, sound_data& result, std::string
 
 	return load_ogg_from_memory(buffer.data(), buffer.size(), result, err);
 }
-bool load_wav_from_file(const std::string& path, sound_data& result, std::string& err)
+auto load_wav_from_file(const std::string& path, sound_data& result, std::string& err) -> bool
 {
 	byte_array_t buffer;
 	if(!load_file(path, buffer))
@@ -130,7 +130,7 @@ bool load_wav_from_file(const std::string& path, sound_data& result, std::string
 	return load_wav_from_memory(buffer.data(), buffer.size(), result, err);
 }
 
-bool load_from_file(const std::string& path, sound_data& result, std::string& err)
+auto load_from_file(const std::string& path, sound_data& result, std::string& err) -> bool
 {
 	auto ext = get_extension(path);
 	if(ext == "wav")
