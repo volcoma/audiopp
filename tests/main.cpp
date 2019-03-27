@@ -47,7 +47,7 @@ int main()
 	try
 	{
 		// initialize the audio device
-		audio::device device(-1);
+		audio::device device;
 
 		std::vector<test_info> infos;
 		add_expected_info(infos, DATA "17.wav", 44100, 2, 1);
@@ -114,7 +114,6 @@ int main()
 			audio::log_info("sample_rate : " + std::to_string(data.info.sample_rate));
 			audio::log_info("channels : " + std::to_string(data.info.channels));
 
-			auto og = data;
 			audio::sound sound(std::move(data), true);
 			audio::source source;
 
