@@ -26,25 +26,24 @@ public:
 
 	auto is_valid() const -> bool;
 	auto native_handles() const -> const std::vector<native_handle_type>&;
-	auto load_chunk() -> bool;
-	auto load_chunk(size_t chunk_size) -> bool;
+	auto upload_chunk() -> bool;
+	auto append_chunk(const std::vector<uint8_t>& data) -> bool;
 	auto get_info() const -> const sound_info&;
-
-	void append_chunk(const std::vector<uint8_t>& data);
+	auto get_byte_size_for(sound_info::duration_t desired_duration) const -> size_t;
 
 private:
 	friend class source_impl;
 
+	auto upload_chunk(size_t desired_size) -> bool;
 	void bind_to_source(source_impl* source);
 	void unbind_from_source(source_impl* source);
 	void unbind_from_all_sources();
-
 	/// created buffer handles
 	std::vector<native_handle_type> handles_;
 
 	// transient data valid until the audio is being streamed from memory
 	std::vector<std::uint8_t> data_;
-	size_t data_offset_ = 0;
+	size_t data_offset_{0};
 
 	/// the sound info
 	sound_info info_;

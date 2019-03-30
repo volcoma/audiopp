@@ -16,7 +16,6 @@ enum format : uint32_t
 
 struct riff_header
 {
-	constexpr static const std::size_t spec_sz = 12;
 	/// Contains the letters "RIFF" in ASCII form
 	/// (0x52494646 big-endian form).
 	char header[4] = {0};
@@ -31,7 +30,6 @@ struct riff_header
 
 struct format_header
 {
-	constexpr static const std::size_t spec_sz = 24;
 	/// Contains the letters "fmt " (includes trailing space)
 	/// (0x666d7420 big-endian form).
 	char header[4] = {0};
@@ -65,7 +63,6 @@ struct format_header
 
 struct data_header
 {
-	constexpr static const std::size_t spec_sz = 8;
 	/// Contains the letters "data"
 	/// (0x64617461 big-endian form).
 	char header[4] = {0};
@@ -114,7 +111,12 @@ bool get_chunk_offset(const std::uint8_t* data, size_t size, const std::string& 
 
 static bool read_header(wav_header& header, const std::uint8_t* data, size_t size, size_t& offset)
 {
-	std::memcpy(&header.riff, data, riff_header::spec_sz);
+	if(size < sizeof(riff_header))
+	{
+		return false;
+	}
+
+	std::memcpy(&header.riff, data, sizeof(riff_header));
 	if(std::memcmp(header.riff.header, "RIFF", 4) != 0)
 	{
 		return false;
@@ -125,16 +127,17 @@ static bool read_header(wav_header& header, const std::uint8_t* data, size_t siz
 		return false;
 	}
 
-	std::memcpy(&header.format, data + offset, format_header::spec_sz);
+	std::memcpy(&header.format, data + offset, sizeof(format_header));
 
 	if(!get_chunk_offset(data, size, "data", offset))
 	{
 		return false;
 	}
 
-	std::memcpy(&header.data, data + offset, data_header::spec_sz);
+	std::memcpy(&header.data, data + offset, sizeof(data_header));
 
-	offset += data_header::spec_sz;
+	// advance to the data samples after the header
+	offset += sizeof(data_header);
 
 	(void)data;
 	(void)size;
@@ -178,10 +181,8 @@ bool load_wav_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 	result.info.bytes_per_sample = std::uint8_t(header.format.bit_depth) / 8;
 	result.info.channels = std::uint8_t(header.format.num_channels);
 
-	// offset to the samples
-	data += offset;
 	result.data.resize(std::size_t(header.data.data_bytes));
-	std::memcpy(result.data.data(), data, result.data.size());
+	std::memcpy(result.data.data(), data + offset, result.data.size());
 
 	return true;
 }

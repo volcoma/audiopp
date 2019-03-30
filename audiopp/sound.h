@@ -36,12 +36,6 @@ public:
 	auto get_info() const -> const sound_info&;
 
 	//-----------------------------------------------------------------------------
-	/// Loads the next chunk of the buffer if streaming is enabled.
-	/// If already loaded, it does nothing.
-	//-----------------------------------------------------------------------------
-	auto load_chunk() -> bool;
-
-	//-----------------------------------------------------------------------------
 	/// Adds a pcm data chunk
 	//-----------------------------------------------------------------------------
 	void append_chunk(const std::vector<uint8_t>& data);

@@ -10,27 +10,26 @@ namespace detail
 {
 source_impl::source_impl()
 {
-	if(!create())
+	al_check(alGenSources(1, &handle_));
+
+	if(!is_valid())
 	{
 		throw audio::exception("Cannot create source.");
 	}
+
+	al_check(alSourcei(handle_, AL_SOURCE_RELATIVE, AL_FALSE));
 }
 
 source_impl::~source_impl()
 {
-	purge();
-}
-
-auto source_impl::create() -> bool
-{
-	if(handle_ != 0u)
+	if(!is_valid())
 	{
-		return true;
+		return;
 	}
 
-	al_check(alGenSources(1, &handle_));
+	unbind();
 
-	return is_valid();
+	al_check(alDeleteSources(1, &handle_));
 }
 
 auto source_impl::bind(sound_impl* sound) -> bool
@@ -45,55 +44,37 @@ auto source_impl::bind(sound_impl* sound) -> bool
 	bind_sound(sound);
 
 	const auto& handles = sound->native_handles();
-
-	al_check(alSourcei(handle_, AL_SOURCE_RELATIVE, AL_FALSE));
-	al_check(alSourcei(handle_, AL_BUFFER, 0));
-
-	enqueue_buffers(handles.data(), handles.size());
+	if(!handles.empty())
+	{
+		enqueue_buffers(handles.data(), handles.size());
+	}
+	else
+	{
+		update_stream();
+	}
 
 	return true;
 }
 
 auto source_impl::has_binded_sound() const -> bool
 {
-	ALint buffer = 0;
-	al_check(alGetSourcei(handle_, AL_BUFFERS_QUEUED, &buffer));
-	return buffer != 0;
+	return get_queued_buffers() != 0;
 }
 
 void source_impl::unbind()
 {
-	if(!is_bound())
+	auto queued = get_queued_buffers();
+
+	if(queued == 0)
 	{
 		return;
 	}
+
 	stop();
 
-	ALint queued = 0;
-	al_check(alGetSourcei(handle_, AL_BUFFERS_QUEUED, &queued));
-	while(queued--)
-	{
-		ALuint buffer = 0;
-		al_check(alSourceUnqueueBuffers(handle_, 1, &buffer));
-	}
-
-	al_check(alSourcei(handle_, AL_BUFFER, 0));
+	unqueue_buffers(queued);
 
 	unbind_sound();
-}
-
-void source_impl::purge()
-{
-	if(handle_ == 0u)
-	{
-		return;
-	}
-
-	unbind();
-
-	al_check(alDeleteSources(1, &handle_));
-
-	handle_ = 0;
 }
 
 void source_impl::set_playing_offset(float seconds)
@@ -157,13 +138,6 @@ auto source_impl::is_stopped() const -> bool
 	ALint state = AL_INITIAL;
 	al_check(alGetSourcei(handle_, AL_SOURCE_STATE, &state));
 	return (state == AL_STOPPED);
-}
-
-auto source_impl::is_bound() const -> bool
-{
-	ALint buffer = 0;
-	al_check(alGetSourcei(handle_, AL_BUFFER, &buffer));
-	return (buffer != 0);
 }
 
 void source_impl::set_loop(bool on) const
@@ -232,7 +206,7 @@ auto source_impl::update_stream() -> bool
 {
 	if(bound_sound_)
 	{
-		return bound_sound_->load_chunk();
+		return bound_sound_->upload_chunk();
 	}
 
 	return false;
@@ -251,6 +225,22 @@ auto source_impl::get_bound_sound_uid() const -> uintptr_t
 void source_impl::enqueue_buffers(const native_handle_type* handles, size_t count) const
 {
 	al_check(alSourceQueueBuffers(handle_, ALsizei(count), handles));
+}
+
+void source_impl::unqueue_buffers(size_t count) const
+{
+	while(count--)
+	{
+		ALuint buffer = 0;
+		al_check(alSourceUnqueueBuffers(handle_, 1, &buffer));
+	}
+}
+
+size_t source_impl::get_queued_buffers() const
+{
+	ALint queued = 0;
+	al_check(alGetSourcei(handle_, AL_BUFFERS_QUEUED, &queued));
+	return static_cast<size_t>(queued);
 }
 
 void source_impl::bind_sound(sound_impl* sound)

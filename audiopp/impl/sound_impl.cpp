@@ -12,14 +12,14 @@ namespace detail
 
 namespace detail
 {
-static auto get_format_for_channels(std::uint32_t channels, std::uint32_t bytes_per_sample) -> ALenum
+static auto get_format(const sound_info& info) -> ALenum
 {
 	ALenum format = 0;
-	switch(channels)
+	switch(info.channels)
 	{
 		case 1:
 		{
-			switch(bytes_per_sample)
+			switch(info.bytes_per_sample)
 			{
 				case 1:
 					format = AL_FORMAT_MONO8;
@@ -28,7 +28,8 @@ static auto get_format_for_channels(std::uint32_t channels, std::uint32_t bytes_
 					format = AL_FORMAT_MONO16;
 					break;
 				default:
-					log_error("Unsupported bytes per sample count : " + std::to_string(bytes_per_sample));
+					log_error("Unsupported bytes per sample count : " +
+							  std::to_string(info.bytes_per_sample));
 					break;
 			}
 		}
@@ -36,7 +37,7 @@ static auto get_format_for_channels(std::uint32_t channels, std::uint32_t bytes_
 
 		case 2:
 		{
-			switch(bytes_per_sample)
+			switch(info.bytes_per_sample)
 			{
 				case 1:
 					format = AL_FORMAT_STEREO8;
@@ -45,22 +46,24 @@ static auto get_format_for_channels(std::uint32_t channels, std::uint32_t bytes_
 					format = AL_FORMAT_STEREO16;
 					break;
 				default:
-					log_error("Unsupported bytes per sample count : " + std::to_string(bytes_per_sample));
+					log_error("Unsupported bytes per sample count : " +
+							  std::to_string(info.bytes_per_sample));
 					break;
 			}
 		}
 		break;
 
 		default:
-			log_error("Unsupported channel count : " + std::to_string(channels));
+			log_error("Unsupported channel count : " + std::to_string(info.channels));
 			break;
 	}
 
 	return format;
 }
+
 } // namespace detail
 
-constexpr static const size_t CHUNK_SIZE = 64 * 1024; // size of buffer if streaming
+using namespace std::chrono_literals;
 
 sound_impl::sound_impl() = default;
 sound_impl::sound_impl(std::vector<std::uint8_t>&& buffer, const sound_info& info, bool stream /*= false*/)
@@ -68,12 +71,6 @@ sound_impl::sound_impl(std::vector<std::uint8_t>&& buffer, const sound_info& inf
 	, info_(info)
 	, stream_(stream)
 {
-	if(data_.empty())
-	{
-		return;
-	}
-
-	load_chunk();
 }
 
 sound_impl::~sound_impl()
@@ -86,46 +83,54 @@ sound_impl::~sound_impl()
 	}
 }
 
-auto sound_impl::load_chunk() -> bool
+auto sound_impl::upload_chunk() -> bool
 {
 	if(stream_)
 	{
-		return load_chunk(CHUNK_SIZE);
+		return upload_chunk(get_byte_size_for(1s));
 	}
 
-	return load_chunk(data_.size());
+	return upload_chunk(data_.size());
 }
 
-auto sound_impl::load_chunk(size_t chunk_size) -> bool
+auto sound_impl::upload_chunk(size_t desired_size) -> bool
 {
 	if(data_.empty())
 	{
 		return false;
 	}
-	size_t actual_size = std::min(data_.size() - data_offset_, chunk_size);
 
-	ALenum format = detail::get_format_for_channels(info_.channels, info_.bytes_per_sample);
+	// get the actual chunk size depending on how much is left in the buffer
+	auto chunk_size = std::min(data_.size() - data_offset_, desired_size);
+	auto format = detail::get_format(info_);
 
-	native_handle_type h = 0;
+	native_handle_type h{0};
 	al_check(alGenBuffers(1, &h));
-	al_check(alBufferData(h, format, data_.data() + data_offset_, ALsizei(actual_size),
+	al_check(alBufferData(h, format, data_.data() + data_offset_, ALsizei(chunk_size),
 						  ALsizei(info_.sample_rate)));
+
+	// add the handle for bookkeeping
 	handles_.emplace_back(h);
 
-	data_offset_ += actual_size;
+	data_offset_ += chunk_size;
+
+	log_info("loaded : " + std::to_string(chunk_size));
 
 	{
+		// enqueue the newly created buffer
+		// to all the bound sources
 		std::lock_guard<std::mutex> lock(mutex_);
+		log_info("updating : " + std::to_string(bound_to_sources_.size()) + " sources");
+
 		for(auto source : bound_to_sources_)
 		{
-			// enqueue the newly created buffer
 			source->enqueue_buffers(&handles_.back(), 1);
 		}
 	}
 
 	if(data_offset_ == data_.size())
 	{
-		// force deallocate
+		// force deallocate and clear out the data
 		std::vector<uint8_t>().swap(data_);
 		data_offset_ = 0;
 	}
@@ -138,11 +143,25 @@ auto sound_impl::get_info() const -> const sound_info&
 	return info_;
 }
 
-void sound_impl::append_chunk(const std::vector<uint8_t>& data)
+auto sound_impl::get_byte_size_for(sound_info::duration_t desired_duration) const -> size_t
 {
+	constexpr static const size_t min_chunk = 4096 * 4;
+	return std::max<size_t>(
+		min_chunk, static_cast<size_t>(desired_duration.count() *
+									   double(info_.sample_rate * info_.channels * info_.bytes_per_sample)));
+}
+
+auto sound_impl::append_chunk(const std::vector<uint8_t>& data) -> bool
+{
+	if(data.empty())
+	{
+		return false;
+	}
 	auto offset = data_.size();
 	data_.resize(data_.size() + data.size());
 	std::memcpy(data_.data() + offset, data.data(), data.size());
+
+	return true;
 }
 
 auto sound_impl::is_valid() const -> bool

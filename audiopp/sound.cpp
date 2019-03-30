@@ -28,11 +28,6 @@ auto sound::get_info() const -> const sound_info&
 	return empty;
 }
 
-auto sound::load_chunk() -> bool
-{
-	return impl_ && impl_->load_chunk();
-}
-
 void sound::append_chunk(const std::vector<uint8_t>& data)
 {
 	if(impl_)

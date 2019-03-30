@@ -24,11 +24,9 @@ public:
 	source_impl(const source_impl& rhs) = delete;
 	source_impl& operator=(const source_impl& rhs) = delete;
 
-	auto create() -> bool;
 	auto bind(sound_impl* sound) -> bool;
 	auto has_binded_sound() const -> bool;
 	void unbind();
-	void purge();
 
 	void set_loop(bool on) const;
 	void set_volume(float volume) const;
@@ -49,16 +47,17 @@ public:
 	auto is_playing() const -> bool;
 	auto is_paused() const -> bool;
 	auto is_stopped() const -> bool;
-	auto is_bound() const -> bool;
 	auto is_valid() const -> bool;
 	auto is_looping() const -> bool;
 
-
-    auto update_stream() -> bool;
+	auto update_stream() -> bool;
 	auto native_handle() const -> native_handle_type;
-    auto get_bound_sound_uid() const -> uintptr_t;
+	auto get_bound_sound_uid() const -> uintptr_t;
 
-    void enqueue_buffers(const native_handle_type* handles, size_t count) const;
+	void enqueue_buffers(const native_handle_type* handles, size_t count) const;
+	void unqueue_buffers(size_t count) const;
+
+	size_t get_queued_buffers() const;
 
 private:
 	void bind_sound(sound_impl* sound);
