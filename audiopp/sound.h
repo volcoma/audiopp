@@ -19,8 +19,8 @@ public:
 	sound();
 	~sound();
 	sound(sound_data&& data, bool stream = false);
-	sound(sound&& rhs) noexcept = default;
-	sound& operator=(sound&& rhs) noexcept = default;
+	sound(sound&& rhs) noexcept;
+	sound& operator=(sound&& rhs) noexcept;
 
 	sound(const sound& rhs) = delete;
 	sound& operator=(const sound& rhs) = delete;
@@ -38,7 +38,7 @@ public:
 	//-----------------------------------------------------------------------------
 	/// Adds a pcm data chunk
 	//-----------------------------------------------------------------------------
-	void append_chunk(const std::vector<uint8_t>& data);
+	void append_chunk(std::vector<uint8_t>&& data);
 
 	//-----------------------------------------------------------------------------
 	/// Unique identifier of this sound. 0 is invalid

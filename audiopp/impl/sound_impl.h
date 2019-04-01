@@ -27,7 +27,7 @@ public:
 	auto is_valid() const -> bool;
 	auto native_handles() const -> const std::vector<native_handle_type>&;
 	auto upload_chunk() -> bool;
-	auto append_chunk(const std::vector<uint8_t>& data) -> bool;
+	auto append_chunk(std::vector<uint8_t>&& data) -> bool;
 	auto get_info() const -> const sound_info&;
 	auto get_byte_size_for(sound_info::duration_t desired_duration) const -> size_t;
 

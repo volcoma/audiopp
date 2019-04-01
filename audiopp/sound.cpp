@@ -13,6 +13,9 @@ sound::sound(sound_data&& data, bool stream)
 {
 }
 
+sound::sound(sound&& rhs) noexcept = default;
+sound& sound::operator=(sound&& rhs) noexcept = default;
+
 auto sound::is_valid() const -> bool
 {
 	return impl_ && impl_->is_valid();
@@ -28,11 +31,11 @@ auto sound::get_info() const -> const sound_info&
 	return empty;
 }
 
-void sound::append_chunk(const std::vector<uint8_t>& data)
+void sound::append_chunk(std::vector<uint8_t>&& data)
 {
 	if(impl_)
 	{
-		impl_->append_chunk(data);
+		impl_->append_chunk(std::move(data));
 	}
 }
 

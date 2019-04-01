@@ -114,13 +114,10 @@ auto sound_impl::upload_chunk(size_t desired_size) -> bool
 
 	data_offset_ += chunk_size;
 
-	log_info("loaded : " + std::to_string(chunk_size));
-
 	{
 		// enqueue the newly created buffer
 		// to all the bound sources
 		std::lock_guard<std::mutex> lock(mutex_);
-		log_info("updating : " + std::to_string(bound_to_sources_.size()) + " sources");
 
 		for(auto source : bound_to_sources_)
 		{
@@ -145,21 +142,26 @@ auto sound_impl::get_info() const -> const sound_info&
 
 auto sound_impl::get_byte_size_for(sound_info::duration_t desired_duration) const -> size_t
 {
-	constexpr static const size_t min_chunk = 4096 * 4;
-	return std::max<size_t>(
-		min_chunk, static_cast<size_t>(desired_duration.count() *
-									   double(info_.sample_rate * info_.channels * info_.bytes_per_sample)));
+	return static_cast<size_t>(desired_duration.count() *
+							   double(info_.sample_rate * info_.channels * info_.bytes_per_sample));
 }
 
-auto sound_impl::append_chunk(const std::vector<uint8_t>& data) -> bool
+auto sound_impl::append_chunk(std::vector<uint8_t>&& data) -> bool
 {
 	if(data.empty())
 	{
 		return false;
 	}
-	auto offset = data_.size();
-	data_.resize(data_.size() + data.size());
-	std::memcpy(data_.data() + offset, data.data(), data.size());
+	if(data_.empty())
+	{
+		data_ = std::move(data);
+	}
+	else
+	{
+		auto sz = data_.size();
+		data_.resize(sz + data.size());
+		std::memcpy(data_.data() + sz, data.data(), data.size());
+	}
 
 	return true;
 }
