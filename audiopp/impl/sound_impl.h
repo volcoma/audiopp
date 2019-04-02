@@ -41,8 +41,9 @@ private:
 	/// created buffer handles
 	std::vector<native_handle_type> handles_;
 
-	// transient data valid until the audio is being streamed from memory
+	/// transient data valid until the audio is being streamed from memory
 	std::vector<std::uint8_t> data_;
+	/// offset into the data buffer to upload from
 	size_t data_offset_{0};
 
 	/// the sound info

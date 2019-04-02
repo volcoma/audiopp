@@ -191,11 +191,19 @@ void source::bind(const sound& snd)
 	}
 }
 
-auto source::has_binded_sound() const -> bool
+void source::unbind()
 {
 	if(is_valid())
 	{
-		return impl_->has_binded_sound();
+		impl_->unbind();
+	}
+}
+
+auto source::has_bound_sound() const -> bool
+{
+	if(is_valid())
+	{
+		return impl_->has_bound_sound();
 	}
 
 	return false;

@@ -29,11 +29,11 @@ public:
 	/// Specifies the buffer to provide sound samples.
 	//-----------------------------------------------------------------------------
 	void bind(const sound& snd);
-
+	void unbind();
 	//-----------------------------------------------------------------------------
 	/// Checks whether this source has a sound binded to it.
 	//-----------------------------------------------------------------------------
-	auto has_binded_sound() const -> bool;
+	auto has_bound_sound() const -> bool;
 
 	//-----------------------------------------------------------------------------
 	/// Specifies whether source is looping.

@@ -25,7 +25,7 @@ public:
 	source_impl& operator=(const source_impl& rhs) = delete;
 
 	auto bind(sound_impl* sound) -> bool;
-	auto has_binded_sound() const -> bool;
+	auto has_bound_sound() const -> bool;
 	void unbind();
 
 	void set_loop(bool on) const;

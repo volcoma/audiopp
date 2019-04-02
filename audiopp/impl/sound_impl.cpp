@@ -118,7 +118,6 @@ auto sound_impl::upload_chunk(size_t desired_size) -> bool
 		// enqueue the newly created buffer
 		// to all the bound sources
 		std::lock_guard<std::mutex> lock(mutex_);
-
 		for(auto source : bound_to_sources_)
 		{
 			source->enqueue_buffers(&handles_.back(), 1);
@@ -168,7 +167,7 @@ auto sound_impl::append_chunk(std::vector<uint8_t>&& data) -> bool
 
 auto sound_impl::is_valid() const -> bool
 {
-	return !handles_.empty();
+	return !handles_.empty() || !data_.empty();
 }
 
 auto sound_impl::native_handles() const -> const std::vector<native_handle_type>&
@@ -192,6 +191,7 @@ void sound_impl::unbind_from_source(source_impl* source)
 
 void sound_impl::unbind_from_all_sources()
 {
+	// move out all the sources playing this sound
 	auto all_sources = [&]() {
 		std::lock_guard<std::mutex> lock(mutex_);
 		return std::move(bound_to_sources_);
@@ -199,10 +199,7 @@ void sound_impl::unbind_from_all_sources()
 
 	for(auto& source : all_sources)
 	{
-		if(source != nullptr)
-		{
-			source->unbind();
-		}
+		source->unbind();
 	}
 }
 

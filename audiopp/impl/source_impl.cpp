@@ -34,7 +34,7 @@ source_impl::~source_impl()
 
 auto source_impl::bind(sound_impl* sound) -> bool
 {
-	if(sound == nullptr)
+	if(!sound)
 	{
 		return false;
 	}
@@ -43,37 +43,16 @@ auto source_impl::bind(sound_impl* sound) -> bool
 
 	bind_sound(sound);
 
-	const auto& handles = sound->native_handles();
-	if(!handles.empty())
-	{
-		enqueue_buffers(handles.data(), handles.size());
-	}
-	else
-	{
-		update_stream();
-	}
-
 	return true;
 }
 
-auto source_impl::has_binded_sound() const -> bool
+auto source_impl::has_bound_sound() const -> bool
 {
 	return get_queued_buffers() != 0;
 }
 
 void source_impl::unbind()
 {
-	auto queued = get_queued_buffers();
-
-	if(queued == 0)
-	{
-		return;
-	}
-
-	stop();
-
-	unqueue_buffers(queued);
-
 	unbind_sound();
 }
 
@@ -252,10 +231,30 @@ void source_impl::bind_sound(sound_impl* sound)
 
 	bound_sound_ = sound;
 	bound_sound_->bind_to_source(this);
+
+	// if we already have some created handles
+	// then just queue them, otherwise update the stream
+	const auto& handles = bound_sound_->native_handles();
+	if(!handles.empty())
+	{
+		enqueue_buffers(handles.data(), handles.size());
+	}
+	else
+	{
+		update_stream();
+	}
 }
 
 void source_impl::unbind_sound()
 {
+	auto queued_buffers = get_queued_buffers();
+
+	if(queued_buffers != 0)
+	{
+		stop();
+		unqueue_buffers(queued_buffers);
+	}
+
 	if(bound_sound_ != nullptr)
 	{
 		bound_sound_->unbind_from_source(this);
