@@ -21,19 +21,33 @@ static auto al_has_extension(ALCdevice* dev, const char* ext) -> bool
 	return (alcIsExtensionPresent(dev, ext) == AL_TRUE); // ALC_TRUE
 }
 
-static auto al_get_strings(ALCdevice* dev, ALenum e) -> std::vector<std::string>
+static auto al_get_string(ALCdevice* dev, ALenum e) -> std::string
 {
-	std::vector<std::string> result;
-
-	auto devices = reinterpret_cast<const char*>(alcGetString(dev, e));
-
-	while(!std::string(devices).empty())
+	auto result = reinterpret_cast<const char*>(alcGetString(dev, e));
+	if(result)
 	{
-		result.emplace_back(devices);
-		devices += result.back().size() + 1;
+		return result;
 	}
 
-	return result;
+	return {};
+}
+
+static auto al_get_strings(ALCdevice* dev, ALenum e) -> std::vector<std::string>
+{
+	std::vector<std::string> output;
+
+	auto result = reinterpret_cast<const char*>(alcGetString(dev, e));
+
+	if(result)
+	{
+		while(!std::string(result).empty())
+		{
+			output.emplace_back(result);
+			result += output.back().size() + 1;
+		}
+	}
+
+	return output;
 }
 
 static auto al_version() -> std::string
@@ -69,10 +83,10 @@ static auto al_extensions() -> std::string
 	return ss.str();
 }
 
-static auto alc_extensions() -> std::string
+static auto alc_extensions(ALCdevice* dev) -> std::string
 {
 	std::stringstream ss;
-	auto extensions = alcGetString(nullptr, ALC_EXTENSIONS);
+	auto extensions = alcGetString(dev, ALC_EXTENSIONS);
 	if(extensions != nullptr)
 	{
 		ss << "OpenALC extensions: " << extensions;
@@ -84,6 +98,12 @@ static auto alc_extensions() -> std::string
 
 device_impl::device_impl(int devnum)
 {
+	if(has_context_thread())
+	{
+		throw audio::exception("OpenAL call. Device/context was already created.");
+	}
+	set_context_thread(std::this_thread::get_id());
+
 	// device name
 	auto playback_devices = enumerate_playback_devices();
 	log_info("Supported audio playback devices:");
@@ -91,12 +111,20 @@ device_impl::device_impl(int devnum)
 	{
 		log_info("-- " + dev);
 	}
+	auto default_playback = enumerate_default_playback_device();
+	log_info("Default audio playback device:");
+	log_info("-- " + default_playback);
+
 	auto capture_devices = enumerate_capture_devices();
 	log_info("Supported audio capture devices:");
 	for(const auto& dev : capture_devices)
 	{
 		log_info("-- " + dev);
 	}
+
+	auto default_capture = enumerate_default_capture_device();
+	log_info("Default audio capture device:");
+	log_info("-- " + default_capture);
 
 	if(devnum >= 0 && devnum < int(playback_devices.size()))
 	{
@@ -111,6 +139,19 @@ device_impl::device_impl(int devnum)
 		log_error("Cant open audio playback device: " + device_id_);
 		throw audio::exception("Cant open audio playback device: " + device_id_);
 	}
+
+	bool can_enumerate = openal::al_has_extension(device_.get(), "ALC_ENUMERATE_ALL_EXT");
+
+	if(can_enumerate)
+	{
+		device_id_ = openal::al_get_string(device_.get(), ALC_ALL_DEVICES_SPECIFIER);
+	}
+	else
+	{
+		device_id_ = openal::al_get_string(device_.get(), ALC_DEVICE_SPECIFIER);
+	}
+	log_info("Selected audio playback device:");
+	log_info("-- " + device_id_);
 
 	// create context
 	context_.reset(alcCreateContext(device_.get(), nullptr));
@@ -129,8 +170,7 @@ device_impl::device_impl(int devnum)
 	log_info(version_);
 	log_info(vendor_);
 	log_info(extensions_);
-	log_info(openal::alc_extensions());
-	log_info("Using audio playback device: " + device_id_);
+	log_info(openal::alc_extensions(device_.get()));
 
 	al_check(alDistanceModel(AL_LINEAR_DISTANCE));
 }
@@ -174,26 +214,36 @@ auto device_impl::get_extensions() const -> const std::string&
 
 auto device_impl::enumerate_capture_devices() -> std::vector<std::string>
 {
-	bool can_enumerate = openal::al_has_extension(nullptr, "ALC_ENUMERATION_EXT");
+	return openal::al_get_strings(nullptr, ALC_CAPTURE_DEVICE_SPECIFIER);
+}
 
-	if(can_enumerate)
-	{
-		return openal::al_get_strings(nullptr, ALC_CAPTURE_DEVICE_SPECIFIER);
-	}
-
-	return {};
+auto device_impl::enumerate_default_capture_device() -> std::string
+{
+	return openal::al_get_string(nullptr, ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER);
 }
 
 auto device_impl::enumerate_playback_devices() -> std::vector<std::string>
 {
-	bool can_enumerate = openal::al_has_extension(nullptr, "ALC_ENUMERATION_EXT");
+	bool can_enumerate = openal::al_has_extension(nullptr, "ALC_ENUMERATE_ALL_EXT");
 
 	if(can_enumerate)
 	{
 		return openal::al_get_strings(nullptr, ALC_ALL_DEVICES_SPECIFIER);
 	}
 
-	return {};
+	return openal::al_get_strings(nullptr, ALC_DEVICE_SPECIFIER);
+}
+
+auto device_impl::enumerate_default_playback_device() -> std::string
+{
+	bool can_enumerate = openal::al_has_extension(nullptr, "ALC_ENUMERATE_ALL_EXT");
+
+	if(can_enumerate)
+	{
+		return openal::al_get_string(nullptr, ALC_DEFAULT_ALL_DEVICES_SPECIFIER);
+	}
+
+	return openal::al_get_string(nullptr, ALC_DEFAULT_DEVICE_SPECIFIER);
 }
 
 void device_impl::deleter::operator()(ALCdevice* obj)

@@ -29,7 +29,13 @@ public:
 	/// Specifies the buffer to provide sound samples.
 	//-----------------------------------------------------------------------------
 	void bind(const sound& snd);
+
+	//-----------------------------------------------------------------------------
+	/// Unbinds the currently bound sound, making the source available
+	/// to bind other sounds.
+	//-----------------------------------------------------------------------------
 	void unbind();
+
 	//-----------------------------------------------------------------------------
 	/// Checks whether this source has a sound binded to it.
 	//-----------------------------------------------------------------------------
@@ -85,17 +91,17 @@ public:
 	//-----------------------------------------------------------------------------
 	/// Sets the source buffer position, in seconds.
 	//-----------------------------------------------------------------------------
-	void set_playing_offset(sound_info::duration_t offset);
+	void set_playback_position(sound_info::duration_t offset);
 
 	//-----------------------------------------------------------------------------
 	/// Gets the source buffer position, in seconds.
 	//-----------------------------------------------------------------------------
-	auto get_playing_offset() const -> sound_info::duration_t;
+	auto get_playback_position() const -> sound_info::duration_t;
 
 	//-----------------------------------------------------------------------------
 	/// Gets the source buffer length, in seconds.
 	//-----------------------------------------------------------------------------
-	auto get_playing_duration() const -> sound_info::duration_t;
+	auto get_playback_duration() const -> sound_info::duration_t;
 
 	//-----------------------------------------------------------------------------
 	/// Play, replay, or resume a Source.

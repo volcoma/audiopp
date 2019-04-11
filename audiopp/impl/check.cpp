@@ -1,4 +1,5 @@
 #include "check.h"
+#include "../exception.h"
 #include "../logger.h"
 #include <string>
 
@@ -9,6 +10,7 @@ namespace audio
 {
 namespace detail
 {
+
 ////////////////////////////////////////////////////////////
 void al_check_error(const char* file, unsigned int line, const char* expression)
 {
@@ -74,6 +76,36 @@ void al_check_error(const char* file, unsigned int line, const char* expression)
 				  "\nExpression:\n   " +
 				  expression + "\nError description:\n   " + error + "\n   " + description);
 	}
+}
+
+std::thread::id& get_context_thread_id() noexcept
+{
+	static std::thread::id id{};
+	return id;
+}
+
+auto has_context_thread() noexcept -> bool
+{
+	return std::thread::id{} != get_context_thread_id();
+}
+
+void al_check_preconditions()
+{
+	if(!has_context_thread())
+	{
+		throw audio::exception("OpenAL call. No device/context was created.");
+	}
+
+	if(std::this_thread::get_id() != get_context_thread_id())
+	{
+		throw audio::exception(
+			"OpenAL call from a different thread than the one the OpenAL context was created in.");
+	}
+}
+
+void set_context_thread(const std::thread::id& id) noexcept
+{
+	get_context_thread_id() = id;
 }
 
 } // namespace detail

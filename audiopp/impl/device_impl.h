@@ -28,6 +28,9 @@ public:
 
 	static auto enumerate_playback_devices() -> std::vector<std::string>;
 	static auto enumerate_capture_devices() -> std::vector<std::string>;
+    static auto enumerate_default_playback_device() -> std::string;
+    static auto enumerate_default_capture_device() -> std::string;
+
 
 private:
 	struct deleter

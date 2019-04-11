@@ -26,18 +26,16 @@ void add_expected_info(std::vector<test_info>& infos, const std::string& file, u
 	infos.emplace_back(info);
 }
 
-void check_conversions(audio::sound_data& data)
+bool check_conversions(audio::sound_data& input_data)
 {
-	auto og = data.data;
-	data.convert_to_opposite();
-	data.convert_to_opposite();
+	auto converted_data = input_data;
+	converted_data.convert_to_opposite();
+	converted_data.convert_to_opposite();
 	std::vector<uint8_t> diff;
-	std::set_difference(og.begin(), og.end(), data.data.begin(), data.data.end(),
-						std::inserter(diff, diff.begin()));
-	if(!diff.empty())
-	{
-		audio::log_info("different after convert");
-	}
+	std::set_difference(input_data.data.begin(), input_data.data.end(), converted_data.data.begin(),
+						converted_data.data.end(), std::inserter(diff, diff.begin()));
+
+	return diff.empty();
 }
 
 int main()
@@ -47,7 +45,7 @@ int main()
 	try
 	{
 		// initialize the audio device
-		audio::device device;
+		audio::device device(2);
 
 		std::vector<test_info> infos;
 		add_expected_info(infos, DATA "17.wav", 44100, 2, 1);
@@ -84,9 +82,7 @@ int main()
 			}
 
 			if(info.expected.bytes_per_sample != data.info.bytes_per_sample ||
-
 			   info.expected.sample_rate != data.info.sample_rate ||
-
 			   info.expected.channels != data.info.channels)
 			{
 				audio::log_error(info.file);
@@ -99,7 +95,11 @@ int main()
 			audio::log_info("sample_rate : " + std::to_string(data.info.sample_rate));
 			audio::log_info("channels : " + std::to_string(data.info.channels));
 
-			// check_conversions(data);
+			if(!check_conversions(data))
+			{
+				audio::log_info("different after convert");
+				continue;
+			}
 
 			loaded_sounds.emplace_back(std::move(data));
 		}
@@ -114,18 +114,20 @@ int main()
 			audio::log_info("sample_rate : " + std::to_string(data.info.sample_rate));
 			audio::log_info("channels : " + std::to_string(data.info.channels));
 
-			audio::sound sound(std::move(data), true);
 			audio::source source;
+			audio::sound sound(std::move(data), true);
 
 			source.bind(sound);
 			source.play();
+
 			while(source.is_playing())
 			{
+				std::this_thread::sleep_for(16067us);
 				source.update_stream();
-				std::this_thread::sleep_for(1667us);
 			}
 		}
 	}
+
 	catch(const audio::exception& e)
 	{
 		audio::log_error(e.what());

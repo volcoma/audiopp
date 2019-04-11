@@ -86,4 +86,14 @@ auto device::enumerate_capture_devices() -> std::vector<std::string>
 {
 	return detail::device_impl::enumerate_capture_devices();
 }
+
+auto device::enumerate_default_playback_device() -> std::string
+{
+	return detail::device_impl::enumerate_default_playback_device();
+}
+
+auto device::enumerate_default_capture_device() -> std::string
+{
+	return detail::device_impl::enumerate_default_capture_device();
+}
 } // namespace audio

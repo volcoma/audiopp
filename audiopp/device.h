@@ -67,6 +67,16 @@ public:
 	//-----------------------------------------------------------------------------
 	static auto enumerate_capture_devices() -> std::vector<std::string>;
 
+	//-----------------------------------------------------------------------------
+	/// Enumerate the default playback device available on the system.
+	//-----------------------------------------------------------------------------
+	static auto enumerate_default_playback_device() -> std::string;
+
+	//-----------------------------------------------------------------------------
+	/// Enumerate the dafault capture devices available on the system.
+	//-----------------------------------------------------------------------------
+	static auto enumerate_default_capture_device() -> std::string;
+
 private:
 	/// pimpl idiom
 	std::unique_ptr<detail::device_impl> impl_;

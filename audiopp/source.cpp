@@ -139,28 +139,28 @@ void source::set_distance(float mind, float maxd) const
 	}
 }
 
-void source::set_playing_offset(sound_info::duration_t offset)
+void source::set_playback_position(sound_info::duration_t offset)
 {
 	if(is_valid())
 	{
-		impl_->set_playing_offset(float(offset.count()));
+		impl_->set_playback_position(float(offset.count()));
 	}
 }
 
-auto source::get_playing_offset() const -> sound_info::duration_t
+auto source::get_playback_position() const -> sound_info::duration_t
 {
 	if(is_valid())
 	{
-		return sound_info::duration_t(impl_->get_playing_offset());
+		return sound_info::duration_t(impl_->get_playback_position());
 	}
 	return sound_info::duration_t::zero();
 }
 
-auto source::get_playing_duration() const -> sound_info::duration_t
+auto source::get_playback_duration() const -> sound_info::duration_t
 {
 	if(is_valid())
 	{
-		return sound_info::duration_t(impl_->get_playing_duration());
+		return sound_info::duration_t(impl_->get_playback_duration());
 	}
 	return sound_info::duration_t::zero();
 }

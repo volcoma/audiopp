@@ -37,9 +37,9 @@ public:
 
 	void set_volume_rolloff(float rolloff) const;
 	void set_distance(float mind, float maxd) const;
-	void set_playing_offset(float seconds);
-	auto get_playing_offset() const -> float;
-	auto get_playing_duration() const -> float;
+	void set_playback_position(float seconds);
+	auto get_playback_position() const -> float;
+	auto get_playback_duration() const -> float;
 
 	void play() const;
 	void stop() const;

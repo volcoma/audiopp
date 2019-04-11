@@ -56,7 +56,7 @@ void source_impl::unbind()
 	unbind_sound();
 }
 
-void source_impl::set_playing_offset(float seconds)
+void source_impl::set_playback_position(float seconds)
 {
 	// temporary load the whole sound here
 	// until we figure out a good way to load until the position we need it
@@ -66,14 +66,14 @@ void source_impl::set_playing_offset(float seconds)
 	al_check(alSourcef(handle_, AL_SEC_OFFSET, seconds));
 }
 
-auto source_impl::get_playing_offset() const -> float
+auto source_impl::get_playback_position() const -> float
 {
 	ALfloat seconds = 0.0f;
 	al_check(alGetSourcef(handle_, AL_SEC_OFFSET, &seconds));
 	return static_cast<float>(seconds);
 }
 
-auto source_impl::get_playing_duration() const -> float
+auto source_impl::get_playback_duration() const -> float
 {
 	if(bound_sound_)
 	{
