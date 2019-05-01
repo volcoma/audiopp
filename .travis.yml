@@ -21,7 +21,6 @@ matrix:
             - libstdc++-5-dev
             - clang-3.8
             - cmake
-            - cmake-data
       env:
         - COMPILERCXX='clang++-3.8'
         - COMPILERC='clang-3.8'
@@ -37,7 +36,6 @@ matrix:
             - libstdc++-6-dev
             - clang-3.9
             - cmake
-            - cmake-data
       env:
         - COMPILERCXX='clang++-3.9'
         - COMPILERC='clang-3.9'
@@ -53,7 +51,6 @@ matrix:
             - libstdc++-6-dev
             - clang-4.0
             - cmake
-            - cmake-data
       env:
         - COMPILERCXX='clang++-4.0'
         - COMPILERC='clang-4.0'
@@ -69,7 +66,6 @@ matrix:
             - libstdc++-7-dev
             - clang-5.0
             - cmake
-            - cmake-data
       env:
         - COMPILERCXX='clang++-5.0'
         - COMPILERC='clang-5.0'
@@ -84,7 +80,6 @@ matrix:
           packages:
             - g++-5
             - cmake
-            - cmake-data
       env:
         - COMPILERCXX='g++-5'
         - COMPILERC='gcc-5'
@@ -98,7 +93,6 @@ matrix:
           packages:
             - g++-6
             - cmake
-            - cmake-data
       env:
         - COMPILERCXX='g++-6'
         - COMPILERC='gcc-6'
@@ -112,7 +106,6 @@ matrix:
           packages:
             - g++-7
             - cmake
-            - cmake-data
       env:
         - COMPILERCXX='g++-7'
         - COMPILERC='gcc-7'
