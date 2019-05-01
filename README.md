@@ -2,7 +2,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/ytbigal46vf5kr2t?svg=true)](https://ci.appveyor.com/project/volcoma/audiopp)
 
 ## audiopp c++14 audio library
-- Supports .wav/.ogg formats
+- Supports loading of .wav/.ogg/.mp3 formats
 - Supports 3d sounds
 - Basically a thin wrapper over OpenAL
 
@@ -13,7 +13,7 @@ int main()
     // Try to load the sound data
     std::string err;
     audio::sound_data data;
-    std::string sample = "some_sample.wav"; // .ogg is supported as well
+    std::string sample = "some_sample.wav"; // .ogg/.mp3 is supported as well
   
     if(!audio::load_from_file(sample, data, err))
     {
