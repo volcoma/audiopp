@@ -13,7 +13,7 @@ int main()
     // Try to load the sound data
     std::string err;
     audio::sound_data data;
-    std::string sample = "some_sample.wav"; // .ogg is supported as well
+    std::string sample = "some_sample.wav"; // .ogg/.mp3 is supported as well
   
     if(!audio::load_from_file(sample, data, err))
     {
