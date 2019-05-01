@@ -19,7 +19,11 @@ class device_impl;
 class device
 {
 public:
-	device(int devnum = 0);
+	//-----------------------------------------------------------------------------
+	/// Initializes a devicee with the specified id.
+	/// Omitting the id means default device.
+	//-----------------------------------------------------------------------------
+	device(const std::string& id = {});
 	~device();
 
 	//-----------------------------------------------------------------------------

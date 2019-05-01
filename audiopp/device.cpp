@@ -13,8 +13,8 @@ static auto get_empty() -> const std::string&
 }
 } // namespace
 
-device::device(int devnum)
-	: impl_(std::make_unique<detail::device_impl>(devnum))
+device::device(const std::string& id)
+	: impl_(std::make_unique<detail::device_impl>(id))
 {
 }
 

@@ -38,7 +38,8 @@ bool load_ogg_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 	std::size_t data_bytes =
 		(stream_len_in_samples * std::size_t(info.channels)) * result.info.bytes_per_sample;
 
-	float seconds = stb_vorbis_stream_length_in_seconds(oss);
+	using duration_rep = sound_info::duration_t::rep;
+	auto seconds = duration_rep(stb_vorbis_stream_length_in_seconds(oss));
 
 	result.info.duration = sound_info::duration_t(seconds);
 	result.data.resize(data_bytes, 0);
@@ -47,6 +48,7 @@ bool load_ogg_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 		oss, info.channels, reinterpret_cast<std::int16_t*>(result.data.data()), int(data_bytes));
 
 	stb_vorbis_close(oss);
+	err = {};
 	return true;
 }
 } // namespace audio

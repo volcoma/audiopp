@@ -175,8 +175,10 @@ bool load_wav_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 	}
 
 	result.info.sample_rate = std::uint32_t(header.format.sample_rate);
-	result.info.duration = sound_info::duration_t(sound_info::duration_t::rep(header.data.data_bytes) /
-												  sound_info::duration_t::rep(header.format.byte_rate));
+	using duration_rep = sound_info::duration_t::rep;
+
+	auto seconds = duration_rep(header.data.data_bytes) / duration_rep(header.format.byte_rate);
+	result.info.duration = sound_info::duration_t(seconds);
 
 	result.info.bytes_per_sample = std::uint8_t(header.format.bit_depth) / 8;
 	result.info.channels = std::uint8_t(header.format.num_channels);
@@ -184,6 +186,7 @@ bool load_wav_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 	result.data.resize(std::size_t(header.data.data_bytes));
 	std::memcpy(result.data.data(), data + offset, result.data.size());
 
+	err = {};
 	return true;
 }
 } // namespace audio

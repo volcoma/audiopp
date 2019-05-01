@@ -13,7 +13,7 @@ namespace detail
 class device_impl
 {
 public:
-	device_impl(int devnum);
+	device_impl(const std::string& id = {});
 	~device_impl();
 
 	void enable();

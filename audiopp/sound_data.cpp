@@ -14,7 +14,7 @@ void sound_data::convert_to_mono()
 	}
 	else if(info.channels > 2)
 	{
-		log_error("Does not support mono conversion of buffers with more than 2 channels");
+		error() << "Does not support mono conversion of buffers with more than 2 channels";
 	}
 }
 
@@ -27,7 +27,7 @@ void sound_data::convert_to_stereo()
 	}
 	else if(info.channels > 2)
 	{
-		log_error("Does not support mono conversion of buffers with more than 2 channels");
+		error() << "Does not support mono conversion of buffers with more than 2 channels";
 	}
 }
 
@@ -43,7 +43,7 @@ void sound_data::convert_to_opposite()
 	}
 	else
 	{
-		log_error("Does not support conversion of buffers with more than 2 channels");
+		error() << "Does not support conversion of buffers with more than 2 channels";
 	}
 }
 } // namespace audio

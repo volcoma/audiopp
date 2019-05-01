@@ -12,20 +12,20 @@ auto convert_to_mono(const std::vector<std::uint8_t>& stereo_samples, std::uint8
 {
 	if(bytes_per_sample > 2)
 	{
-		log_error("Sound buffer is not 8/16 bits per sample. Unsupported");
+		error() << "Sound buffer is not 8/16 bits per sample. Unsupported";
 		return stereo_samples;
 	}
 
 	if(sizeof(SampleType) != bytes_per_sample)
 	{
-		log_error("Requested sample type is not the proper size");
+		error() << "Requested sample type is not the proper size";
 		return stereo_samples;
 	}
 
 	const auto input_size = stereo_samples.size();
 	if(input_size % bytes_per_sample != 0)
 	{
-		log_error("Sound buffer is not the proper size");
+		error() << "Sound buffer is not the proper size";
 		return stereo_samples;
 	}
 
@@ -68,14 +68,14 @@ auto convert_to_stereo(const std::vector<std::uint8_t>& mono_samples, std::uint8
 {
 	if(bytes_per_sample > 2)
 	{
-		log_error("Sound buffer is not 8/16 bits per sample");
+		error() << "Sound buffer is not 8/16 bits per sample";
 		return mono_samples;
 	}
 
 	const auto input_size = mono_samples.size();
 	if(input_size % bytes_per_sample != 0)
 	{
-		log_error("Sound buffer is not the proper size");
+		error() << "Sound buffer is not the proper size";
 		return mono_samples;
 	}
 

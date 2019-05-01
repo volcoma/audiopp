@@ -4,43 +4,56 @@ namespace audio
 {
 namespace detail
 {
-auto get_info_logger() -> logger_t&
+auto get_info_logger() -> log_func_t&
 {
-	static logger_t logger;
+	static log_func_t logger;
 	return logger;
 }
-auto get_error_logger() -> logger_t&
+auto get_error_logger() -> log_func_t&
 {
-	static logger_t logger;
+	static log_func_t logger;
 	return logger;
 }
 } // namespace detail
 
-void log_info(const std::string& msg)
+void set_info_logger(const log_func_t& logger)
 {
-	auto logger = detail::get_info_logger();
-	if(logger)
+	detail::get_info_logger() = logger;
+}
+
+void set_error_logger(const log_func_t& logger)
+{
+	detail::get_error_logger() = logger;
+}
+
+logger::logger(const log_func_t& func)
+	: func_(func)
+{
+}
+
+logger::~logger()
+{
+	if(func_)
 	{
-		logger(msg);
+		auto msg = str_.str();
+		if(!msg.empty())
+		{
+			func_(msg);
+		}
 	}
 }
 
-void set_info_logger(std::function<void(const std::string&)> logger)
+auto info() -> logger
 {
-	detail::get_info_logger() = std::move(logger);
+	return {detail::get_info_logger()};
+}
+auto error() -> logger
+{
+	return {detail::get_error_logger()};
+}
+auto trace() -> logger
+{
+	return {detail::get_info_logger()};
 }
 
-void log_error(const std::string& msg)
-{
-	auto logger = detail::get_error_logger();
-	if(logger)
-	{
-		logger(msg);
-	}
-}
-
-void set_error_logger(std::function<void(const std::string&)> logger)
-{
-	detail::get_error_logger() = std::move(logger);
-}
 } // namespace audio

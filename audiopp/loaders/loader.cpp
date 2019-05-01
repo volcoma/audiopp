@@ -104,30 +104,71 @@ auto load_from_memory(const uint8_t* data, size_t size, sound_data& result, std:
 	{
 		success |= load_ogg_from_memory(data, size, result, err);
 	}
+	if(!success)
+	{
+		success |= load_mp3_from_memory(data, size, result, err);
+	}
+
 	return success;
 }
 
 auto load_ogg_from_file(const std::string& path, sound_data& result, std::string& err) -> bool
 {
+	err = {};
+
 	byte_array_t buffer;
 	if(!load_file(path, buffer))
 	{
-		log_error("Failed to load file " + path);
+		err = "Failed to load file : " + path;
 		return false;
 	}
 
-	return load_ogg_from_memory(buffer.data(), buffer.size(), result, err);
+	if(!load_ogg_from_memory(buffer.data(), buffer.size(), result, err))
+	{
+		return false;
+	}
+
+	result.info.id = path;
+	return true;
 }
 auto load_wav_from_file(const std::string& path, sound_data& result, std::string& err) -> bool
 {
+	err = {};
+
 	byte_array_t buffer;
 	if(!load_file(path, buffer))
 	{
-		log_error("Failed to load file " + path);
+		err = "Failed to load file : " + path;
 		return false;
 	}
 
-	return load_wav_from_memory(buffer.data(), buffer.size(), result, err);
+	if(!load_wav_from_memory(buffer.data(), buffer.size(), result, err))
+	{
+		return false;
+	}
+
+	result.info.id = path;
+	return true;
+}
+
+auto load_mp3_from_file(const std::string& path, sound_data& result, std::string& err) -> bool
+{
+	err = {};
+
+	byte_array_t buffer;
+	if(!load_file(path, buffer))
+	{
+		err = "Failed to load file : " + path;
+		return false;
+	}
+
+	if(!load_mp3_from_memory(buffer.data(), buffer.size(), result, err))
+	{
+		return false;
+	}
+
+	result.info.id = path;
+	return true;
 }
 
 auto load_from_file(const std::string& path, sound_data& result, std::string& err) -> bool
@@ -141,6 +182,12 @@ auto load_from_file(const std::string& path, sound_data& result, std::string& er
 	{
 		return load_ogg_from_file(path, result, err);
 	}
+	else if(ext == "mp3")
+	{
+		return load_mp3_from_file(path, result, err);
+	}
+
+	err = "Unsupported audio file format : " + ext;
 	return false;
 }
 

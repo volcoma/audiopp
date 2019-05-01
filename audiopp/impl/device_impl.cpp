@@ -18,7 +18,7 @@ namespace openal
 {
 static auto al_has_extension(ALCdevice* dev, const char* ext) -> bool
 {
-	return (alcIsExtensionPresent(dev, ext) == AL_TRUE); // ALC_TRUE
+	return (alcIsExtensionPresent(dev, ext) == ALC_TRUE); // ALC_TRUE
 }
 
 static auto al_get_string(ALCdevice* dev, ALenum e) -> std::string
@@ -96,7 +96,7 @@ static auto alc_extensions(ALCdevice* dev) -> std::string
 }
 } // namespace openal
 
-device_impl::device_impl(int devnum)
+device_impl::device_impl(const std::string& id)
 {
 	if(has_context_thread())
 	{
@@ -104,39 +104,14 @@ device_impl::device_impl(int devnum)
 	}
 	set_context_thread(std::this_thread::get_id());
 
-	// device name
-	auto playback_devices = enumerate_playback_devices();
-	log_info("Supported audio playback devices:");
-	for(const auto& dev : playback_devices)
-	{
-		log_info("-- " + dev);
-	}
-	auto default_playback = enumerate_default_playback_device();
-	log_info("Default audio playback device:");
-	log_info("-- " + default_playback);
-
-	auto capture_devices = enumerate_capture_devices();
-	log_info("Supported audio capture devices:");
-	for(const auto& dev : capture_devices)
-	{
-		log_info("-- " + dev);
-	}
-
-	auto default_capture = enumerate_default_capture_device();
-	log_info("Default audio capture device:");
-	log_info("-- " + default_capture);
-
-	if(devnum >= 0 && devnum < int(playback_devices.size()))
-	{
-		device_id_ = playback_devices[std::size_t(devnum)];
-	}
-
 	// select device
-	device_.reset(alcOpenDevice(device_id_.empty() ? nullptr : device_id_.c_str()));
+	device_.reset(alcOpenDevice(id.empty() ? nullptr : id.c_str()));
+
+	device_id_ = id;
 
 	if(device_ == nullptr)
 	{
-		log_error("Cant open audio playback device: " + device_id_);
+		error() << "Cant open audio playback device: " << device_id_;
 		throw audio::exception("Cant open audio playback device: " + device_id_);
 	}
 
@@ -150,15 +125,15 @@ device_impl::device_impl(int devnum)
 	{
 		device_id_ = openal::al_get_string(device_.get(), ALC_DEVICE_SPECIFIER);
 	}
-	log_info("Selected audio playback device:");
-	log_info("-- " + device_id_);
+	info() << "Selected audio playback device:";
+	info() << "-- " << device_id_;
 
 	// create context
 	context_.reset(alcCreateContext(device_.get(), nullptr));
 
 	if(context_ == nullptr)
 	{
-		log_error("Cant create audio context for playback device: " + device_id_);
+		error() << "Cant create audio context for playback device: " << device_id_;
 		throw audio::exception("Cant create audio context for playback device: " + device_id_);
 	}
 	enable();
@@ -167,10 +142,10 @@ device_impl::device_impl(int devnum)
 	vendor_ = openal::al_vendor();
 	extensions_ = openal::al_extensions();
 
-	log_info(version_);
-	log_info(vendor_);
-	log_info(extensions_);
-	log_info(openal::alc_extensions(device_.get()));
+	info() << "-- " << version_;
+	info() << "-- " << vendor_;
+	info() << "-- " << extensions_;
+	info() << "-- " << openal::alc_extensions(device_.get());
 
 	al_check(alDistanceModel(AL_LINEAR_DISTANCE));
 }

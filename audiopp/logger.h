@@ -2,28 +2,45 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include <sstream>
 
 namespace audio
 {
-using logger_t = std::function<void(const std::string&)>;
+using log_func_t = std::function<void(const std::string&)>;
 
 //-----------------------------------------------------------------------------
 /// Sets and extern info logging function for the library to use.
 //-----------------------------------------------------------------------------
-void set_info_logger(logger_t logger);
+void set_info_logger(const log_func_t& logger);
 
 //-----------------------------------------------------------------------------
 /// Sets and extern error logging function for the library to use.
 //-----------------------------------------------------------------------------
-void set_error_logger(logger_t logger);
+void set_error_logger(const log_func_t& logger);
 
-//-----------------------------------------------------------------------------
-/// Used internally by the library to log informational messages.
-//-----------------------------------------------------------------------------
-void log_info(const std::string& msg);
+class logger
+{
+public:
+    logger(const log_func_t& func);
+	~logger();
+	template <typename T>
+	logger& operator<<(T&& val)
+	{
+        if(func_)
+        {
+            str_ << val;
+        }
+		return *this;
+	}
 
-//-----------------------------------------------------------------------------
-/// Used internally by the library to log error messages.
-//-----------------------------------------------------------------------------
-void log_error(const std::string& msg);
+private:
+
+    const log_func_t& func_;
+	std::stringstream str_;
+};
+
+auto info() -> logger;
+auto error() -> logger;
+auto trace() -> logger;
+
 } // namespace audio

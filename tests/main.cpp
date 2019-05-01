@@ -9,129 +9,150 @@
 
 using namespace std::chrono_literals;
 
-struct test_info
-{
-	std::string file;
-	audio::sound_info expected;
-};
-
-void add_expected_info(std::vector<test_info>& infos, const std::string& file, uint32_t sample_rate,
+void add_expected_info(std::vector<audio::sound_info>& infos, const std::string& file, uint32_t sample_rate,
 					   uint8_t bytes_per_sample, uint8_t channels)
 {
-	test_info info;
-	info.file = file;
-	info.expected.sample_rate = sample_rate;
-	info.expected.bytes_per_sample = bytes_per_sample;
-	info.expected.channels = channels;
-	infos.emplace_back(info);
+	audio::sound_info expected;
+	expected.id = file;
+	expected.sample_rate = sample_rate;
+	expected.bytes_per_sample = bytes_per_sample;
+	expected.channels = channels;
+	infos.emplace_back(expected);
 }
 
-bool check_conversions(audio::sound_data& input_data)
+void enumerate_devices()
 {
-	auto converted_data = input_data;
-	converted_data.convert_to_opposite();
-	converted_data.convert_to_opposite();
-	std::vector<uint8_t> diff;
-	std::set_difference(input_data.data.begin(), input_data.data.end(), converted_data.data.begin(),
-						converted_data.data.end(), std::inserter(diff, diff.begin()));
+	audio::info() << "------------------------------------------";
+	audio::info() << "Enumerating audio devices:";
+	audio::info() << "------------------------------------------";
 
-	return diff.empty();
+	auto playback_devices = audio::device::enumerate_playback_devices();
+	audio::info() << "Supported audio playback devices:";
+	for(const auto& dev : playback_devices)
+	{
+		audio::info() << "-- " << dev;
+	}
+	auto default_playback = audio::device::enumerate_default_playback_device();
+	audio::info() << "Default audio playback device:";
+	audio::info() << "-- " << default_playback;
+
+	auto capture_devices = audio::device::enumerate_capture_devices();
+	audio::info() << "Supported audio capture devices:";
+	for(const auto& dev : capture_devices)
+	{
+		audio::info() << "-- " << dev;
+	}
+
+	auto default_capture = audio::device::enumerate_default_capture_device();
+	audio::info() << "Default audio capture device:";
+	audio::info() << "-- " << default_capture;
+	audio::info() << "------------------------------------------";
 }
 
-int main()
+int main() try
 {
 	audio::set_info_logger([](const std::string& msg) { std::cout << msg << std::endl; });
 	audio::set_error_logger([](const std::string& msg) { std::cout << msg << std::endl; });
-	try
+
+	enumerate_devices();
+
+	// initialize the audio device
+	audio::device device;
+
+	std::vector<audio::sound_info> infos;
+
+	add_expected_info(infos, DATA "pcm0822m.wav", 22050, 1, 1);
+	add_expected_info(infos, DATA "pcm1622m.wav", 22050, 2, 1);
+	add_expected_info(infos, DATA "pcm0822s.wav", 22050, 1, 2);
+	add_expected_info(infos, DATA "pcm1622s.wav", 22050, 2, 2);
+	add_expected_info(infos, DATA "pcm0844m.wav", 44100, 1, 1);
+	add_expected_info(infos, DATA "pcm1644m.wav", 44100, 2, 1);
+	add_expected_info(infos, DATA "pcm0844s.wav", 44100, 1, 2);
+	add_expected_info(infos, DATA "pcm1644s.wav", 44100, 2, 2);
+
+	// ogg loader will force 2 bytes per sample
+	add_expected_info(infos, DATA "pcm0822m.ogg", 22050, 2, 1);
+	add_expected_info(infos, DATA "pcm1622m.ogg", 22050, 2, 1);
+	add_expected_info(infos, DATA "pcm0822s.ogg", 22050, 2, 2);
+	add_expected_info(infos, DATA "pcm1622s.ogg", 22050, 2, 2);
+	add_expected_info(infos, DATA "pcm0844m.ogg", 44100, 2, 1);
+	add_expected_info(infos, DATA "pcm1644m.ogg", 44100, 2, 1);
+	add_expected_info(infos, DATA "pcm0844s.ogg", 44100, 2, 2);
+	add_expected_info(infos, DATA "pcm1644s.ogg", 44100, 2, 2);
+
+	// mp3 loader will force 2 bytes per sample
+	add_expected_info(infos, DATA "pcm0822m.mp3", 22050, 2, 1);
+	add_expected_info(infos, DATA "pcm1622m.mp3", 22050, 2, 1);
+	add_expected_info(infos, DATA "pcm0822s.mp3", 22050, 2, 2);
+	add_expected_info(infos, DATA "pcm1622s.mp3", 22050, 2, 2);
+	add_expected_info(infos, DATA "pcm0844m.mp3", 44100, 2, 1);
+	add_expected_info(infos, DATA "pcm1644m.mp3", 44100, 2, 1);
+	add_expected_info(infos, DATA "pcm0844s.mp3", 44100, 2, 2);
+	add_expected_info(infos, DATA "pcm1644s.mp3", 44100, 2, 2);
+
+	std::vector<audio::sound_data> loaded_sounds;
+
+	for(const auto& expected : infos)
 	{
-		// initialize the audio device
-		audio::device device(2);
-
-		std::vector<test_info> infos;
-		add_expected_info(infos, DATA "17.wav", 44100, 2, 1);
-		add_expected_info(infos, DATA "pcm0822m.wav", 22050, 1, 1);
-		add_expected_info(infos, DATA "pcm1622m.wav", 22050, 2, 1);
-		add_expected_info(infos, DATA "pcm0822s.wav", 22050, 1, 2);
-		add_expected_info(infos, DATA "pcm1622s.wav", 22050, 2, 2);
-		add_expected_info(infos, DATA "pcm0844m.wav", 44100, 1, 1);
-		add_expected_info(infos, DATA "pcm1644m.wav", 44100, 2, 1);
-		add_expected_info(infos, DATA "pcm0844s.wav", 44100, 1, 2);
-		add_expected_info(infos, DATA "pcm1644s.wav", 44100, 2, 2);
-
-		// ogg loader will force 2 bytes per sample
-		add_expected_info(infos, DATA "pcm0822m.ogg", 22050, 2, 1);
-		add_expected_info(infos, DATA "pcm1622m.ogg", 22050, 2, 1);
-		add_expected_info(infos, DATA "pcm0822s.ogg", 22050, 2, 2);
-		add_expected_info(infos, DATA "pcm1622s.ogg", 22050, 2, 2);
-		add_expected_info(infos, DATA "pcm0844m.ogg", 44100, 2, 1);
-		add_expected_info(infos, DATA "pcm1644m.ogg", 44100, 2, 1);
-		add_expected_info(infos, DATA "pcm0844s.ogg", 44100, 2, 2);
-		add_expected_info(infos, DATA "pcm1644s.ogg", 44100, 2, 2);
-
-		std::vector<audio::sound_data> loaded_sounds;
-
-		for(const auto& info : infos)
+		// Try to load the sound data
+		std::string err;
+		audio::sound_data data;
+		if(!audio::load_from_file(expected.id, data, err))
 		{
-			// Try to load the sound data
-			std::string err;
-			audio::sound_data data;
-			if(!audio::load_from_file(info.file, data, err))
-			{
-				audio::log_error("Failed to load sound data");
-				continue;
-			}
-
-			if(info.expected.bytes_per_sample != data.info.bytes_per_sample ||
-			   info.expected.sample_rate != data.info.sample_rate ||
-			   info.expected.channels != data.info.channels)
-			{
-				audio::log_error(info.file);
-				audio::log_error("loaded with wrong expectations");
-				continue;
-			}
-			audio::log_info("------------------------------------------");
-			audio::log_info("loaded");
-			audio::log_info("bytes_per_sample : " + std::to_string(data.info.bytes_per_sample));
-			audio::log_info("sample_rate : " + std::to_string(data.info.sample_rate));
-			audio::log_info("channels : " + std::to_string(data.info.channels));
-
-			if(!check_conversions(data))
-			{
-				audio::log_info("different after convert");
-				continue;
-			}
-
-			loaded_sounds.emplace_back(std::move(data));
+			audio::error() << "Failed to load sound data";
+			continue;
 		}
-		audio::log_info("------------------------------------------");
-		audio::log_info("Playing sounds");
 
-		for(auto& data : loaded_sounds)
+		if(expected.bytes_per_sample != data.info.bytes_per_sample ||
+		   expected.sample_rate != data.info.sample_rate || expected.channels != data.info.channels)
 		{
-			audio::log_info("------------------------------------------");
-			audio::log_info("playing");
-			audio::log_info("bytes_per_sample : " + std::to_string(data.info.bytes_per_sample));
-			audio::log_info("sample_rate : " + std::to_string(data.info.sample_rate));
-			audio::log_info("channels : " + std::to_string(data.info.channels));
+			audio::error() << "[FAIL]";
+			audio::error() << "expected : ";
+			audio::error() << to_string(expected);
+			audio::error() << "loaded : ";
+			audio::error() << to_string(data.info);
 
-			audio::source source;
-			audio::sound sound(std::move(data), true);
-
-			source.bind(sound);
-			source.play();
-
-			while(source.is_playing())
-			{
-				std::this_thread::sleep_for(16067us);
-				source.update_stream();
-			}
+			continue;
 		}
+		audio::info() << "------------------------------------------";
+		audio::info() << "loaded";
+		audio::info() << to_string(data.info);
+		loaded_sounds.emplace_back(std::move(data));
 	}
+	audio::info() << "------------------------------------------";
+	audio::info() << "Playing sounds";
 
-	catch(const audio::exception& e)
+	for(auto& data : loaded_sounds)
 	{
-		audio::log_error(e.what());
+		audio::info() << "------------------------------------------";
+		audio::info() << "now playing";
+		audio::info() << to_string(data.info);
+
+		// creating large internal buffer and uploading it at once
+		// can be slow so we can stream it in chunks if we want to
+		bool stream = false;
+		audio::sound sound(std::move(data), stream);
+
+		audio::source source;
+		source.bind(sound);
+		source.play();
+
+		while(source.is_playing())
+		{
+			std::this_thread::sleep_for(16067us);
+
+			// you can also append more data to the sound at any time
+			// std::vector<uint8_t> some_next_chunk = ;
+			// sound.append_chunk(std::move(some_next_chunk));
+
+			source.update_stream();
+		}
 	}
 
 	return 0;
+}
+
+catch(const audio::exception& e)
+{
+	audio::error() << e.what();
 }

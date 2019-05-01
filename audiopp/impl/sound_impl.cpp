@@ -28,8 +28,7 @@ static auto get_format(const sound_info& info) -> ALenum
 					format = AL_FORMAT_MONO16;
 					break;
 				default:
-					log_error("Unsupported bytes per sample count : " +
-							  std::to_string(info.bytes_per_sample));
+					error() << "Unsupported bytes per sample count : " << uint32_t(info.bytes_per_sample);
 					break;
 			}
 		}
@@ -46,15 +45,14 @@ static auto get_format(const sound_info& info) -> ALenum
 					format = AL_FORMAT_STEREO16;
 					break;
 				default:
-					log_error("Unsupported bytes per sample count : " +
-							  std::to_string(info.bytes_per_sample));
+					error() << "Unsupported bytes per sample count : " << uint32_t(info.bytes_per_sample);
 					break;
 			}
 		}
 		break;
 
 		default:
-			log_error("Unsupported channel count : " + std::to_string(info.channels));
+			error() << "Unsupported channel count : " << uint32_t(info.channels);
 			break;
 	}
 
@@ -66,9 +64,9 @@ static auto get_format(const sound_info& info) -> ALenum
 using namespace std::chrono_literals;
 
 sound_impl::sound_impl() = default;
-sound_impl::sound_impl(std::vector<std::uint8_t>&& buffer, const sound_info& info, bool stream /*= false*/)
+sound_impl::sound_impl(std::vector<std::uint8_t>&& buffer, sound_info&& info, bool stream /*= false*/)
 	: data_(std::move(buffer))
-	, info_(info)
+	, info_(std::move(info))
 	, stream_(stream)
 {
 }

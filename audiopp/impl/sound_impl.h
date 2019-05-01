@@ -17,7 +17,7 @@ public:
 
 	sound_impl();
 	~sound_impl();
-	sound_impl(std::vector<std::uint8_t>&& buffer, const sound_info& info, bool stream = false);
+	sound_impl(std::vector<std::uint8_t>&& buffer, sound_info&& info, bool stream = false);
 
 	sound_impl(sound_impl&& rhs) = delete;
 	sound_impl& operator=(sound_impl&& rhs) = delete;

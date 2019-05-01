@@ -9,7 +9,7 @@ sound::sound() = default;
 sound::~sound() = default;
 
 sound::sound(sound_data&& data, bool stream)
-	: impl_(std::make_unique<detail::sound_impl>(std::move(data.data), data.info, stream))
+	: impl_(std::make_unique<detail::sound_impl>(std::move(data.data), std::move(data.info), stream))
 {
 }
 

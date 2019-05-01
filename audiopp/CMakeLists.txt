@@ -17,6 +17,7 @@ set_target_properties(audiopp PROPERTIES
 find_package(OpenAL REQUIRED)
 
 target_link_libraries(audiopp PRIVATE stb_vorbis)
+target_link_libraries(audiopp PRIVATE minimp3)
 target_link_libraries(audiopp PRIVATE ${OPENAL_LIBRARY})
 target_include_directories(audiopp PRIVATE ${OPENAL_INCLUDE_DIR})
 
