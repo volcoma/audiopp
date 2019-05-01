@@ -1,5 +1,6 @@
 #include "device.h"
 #include "impl/device_impl.h"
+#include "logger.h"
 
 namespace audio
 {
@@ -87,13 +88,43 @@ auto device::enumerate_capture_devices() -> std::vector<std::string>
 	return detail::device_impl::enumerate_capture_devices();
 }
 
-auto device::enumerate_default_playback_device() -> std::string
+auto device::default_playback_device() -> std::string
 {
-	return detail::device_impl::enumerate_default_playback_device();
+	return detail::device_impl::default_playback_device();
 }
 
-auto device::enumerate_default_capture_device() -> std::string
+auto device::default_capture_device() -> std::string
 {
-	return detail::device_impl::enumerate_default_capture_device();
+    return detail::device_impl::default_capture_device();
+}
+
+auto device::enumerate_devices() -> std::string
+{
+    std::stringstream ss;
+	ss << "------------------------------------------\n";
+
+	auto playback_devices = enumerate_playback_devices();
+	ss << "Supported audio playback devices:\n";
+	for(const auto& dev : playback_devices)
+	{
+		ss << "-- " << dev << "\n";
+	}
+	auto default_playback = default_playback_device();
+	ss << "Default audio playback device:\n";
+	ss << "-- " << default_playback << "\n";
+
+	auto capture_devices = enumerate_capture_devices();
+	ss << "Supported audio capture devices:\n";
+	for(const auto& dev : capture_devices)
+	{
+		ss << "-- " << dev << "\n";
+	}
+
+	auto default_capture = default_capture_device();
+	ss << "Default audio capture device:\n";
+	ss << "-- " << default_capture << "\n";
+	ss << "------------------------------------------";
+
+	return ss.str();
 }
 } // namespace audio

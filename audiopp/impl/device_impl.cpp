@@ -192,7 +192,7 @@ auto device_impl::enumerate_capture_devices() -> std::vector<std::string>
 	return openal::al_get_strings(nullptr, ALC_CAPTURE_DEVICE_SPECIFIER);
 }
 
-auto device_impl::enumerate_default_capture_device() -> std::string
+auto device_impl::default_capture_device() -> std::string
 {
 	return openal::al_get_string(nullptr, ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER);
 }
@@ -209,7 +209,7 @@ auto device_impl::enumerate_playback_devices() -> std::vector<std::string>
 	return openal::al_get_strings(nullptr, ALC_DEVICE_SPECIFIER);
 }
 
-auto device_impl::enumerate_default_playback_device() -> std::string
+auto device_impl::default_playback_device() -> std::string
 {
 	bool can_enumerate = openal::al_has_extension(nullptr, "ALC_ENUMERATE_ALL_EXT");
 

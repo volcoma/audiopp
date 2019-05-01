@@ -20,41 +20,12 @@ void add_expected_info(std::vector<audio::sound_info>& infos, const std::string&
 	infos.emplace_back(expected);
 }
 
-void enumerate_devices()
-{
-	audio::info() << "------------------------------------------";
-	audio::info() << "Enumerating audio devices:";
-	audio::info() << "------------------------------------------";
-
-	auto playback_devices = audio::device::enumerate_playback_devices();
-	audio::info() << "Supported audio playback devices:";
-	for(const auto& dev : playback_devices)
-	{
-		audio::info() << "-- " << dev;
-	}
-	auto default_playback = audio::device::enumerate_default_playback_device();
-	audio::info() << "Default audio playback device:";
-	audio::info() << "-- " << default_playback;
-
-	auto capture_devices = audio::device::enumerate_capture_devices();
-	audio::info() << "Supported audio capture devices:";
-	for(const auto& dev : capture_devices)
-	{
-		audio::info() << "-- " << dev;
-	}
-
-	auto default_capture = audio::device::enumerate_default_capture_device();
-	audio::info() << "Default audio capture device:";
-	audio::info() << "-- " << default_capture;
-	audio::info() << "------------------------------------------";
-}
-
 int main() try
 {
 	audio::set_info_logger([](const std::string& msg) { std::cout << msg << std::endl; });
 	audio::set_error_logger([](const std::string& msg) { std::cout << msg << std::endl; });
 
-	enumerate_devices();
+	audio::info() << audio::device::enumerate_devices();
 
 	// initialize the audio device
 	audio::device device;
@@ -151,7 +122,6 @@ int main() try
 
 	return 0;
 }
-
 catch(const audio::exception& e)
 {
 	audio::error() << e.what();

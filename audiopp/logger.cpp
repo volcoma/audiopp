@@ -14,6 +14,11 @@ auto get_error_logger() -> log_func_t&
 	static log_func_t logger;
 	return logger;
 }
+auto get_trace_logger() -> log_func_t&
+{
+	static log_func_t logger;
+	return logger;
+}
 } // namespace detail
 
 void set_info_logger(const log_func_t& logger)
@@ -24,6 +29,10 @@ void set_info_logger(const log_func_t& logger)
 void set_error_logger(const log_func_t& logger)
 {
 	detail::get_error_logger() = logger;
+}
+void set_trace_logger(const log_func_t& logger)
+{
+	detail::get_trace_logger() = logger;
 }
 
 logger::logger(const log_func_t& func)

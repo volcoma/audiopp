@@ -74,12 +74,17 @@ public:
 	//-----------------------------------------------------------------------------
 	/// Enumerate the default playback device available on the system.
 	//-----------------------------------------------------------------------------
-	static auto enumerate_default_playback_device() -> std::string;
+	static auto default_playback_device() -> std::string;
 
 	//-----------------------------------------------------------------------------
 	/// Enumerate the dafault capture devices available on the system.
 	//-----------------------------------------------------------------------------
-	static auto enumerate_default_capture_device() -> std::string;
+	static auto default_capture_device() -> std::string;
+
+    //-----------------------------------------------------------------------------
+	/// Enumerate and devices.
+	//-----------------------------------------------------------------------------
+    static auto enumerate_devices() -> std::string;
 
 private:
 	/// pimpl idiom
