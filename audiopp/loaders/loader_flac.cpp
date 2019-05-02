@@ -1,6 +1,6 @@
 #include "../logger.h"
-#include "decoder_flac.h"
 #include "loader.h"
+#include <decoders/decoder_flac.h>
 
 #include <cstring>
 #include <iostream>

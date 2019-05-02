@@ -1,6 +1,6 @@
 #include "../logger.h"
-#include "decoder_vorbis.h"
 #include "loader.h"
+#include <decoders/decoder_vorbis.h>
 
 namespace audio
 {

@@ -1,5 +1,6 @@
-#include "audiopp/library.h"
-#include "audiopp/loaders/loader.h"
+#include <audiopp/library.h>
+#include <audiopp/loaders/loader.h>
+#include <suitepp/suitepp.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -25,11 +26,6 @@ int main() try
 	audio::set_info_logger([](const std::string& msg) { std::cout << msg << std::endl; });
 	audio::set_trace_logger([](const std::string& msg) { std::cout << msg << std::endl; });
 	audio::set_error_logger([](const std::string& msg) { std::cout << "[error] " << msg << std::endl; });
-
-	audio::device::print_devices();
-
-	// initialize the audio device
-	audio::device device;
 
 	std::vector<audio::sound_info> infos;
 
@@ -72,71 +68,65 @@ int main() try
 	add_expected_info(infos, DATA "pcm1644m.flac", 44100, 16, 1);
 	add_expected_info(infos, DATA "pcm0844s.flac", 44100, 16, 2);
 	add_expected_info(infos, DATA "pcm1644s.flac", 44100, 16, 2);
-
 	std::vector<audio::sound_data> loaded_sounds;
+
+	suitepp::test("device init", [&] {
+		audio::device::print_devices();
+		// initialize the audio device
+		EXPECT_NOTHROWS(audio::device device);
+	});
 
 	for(const auto& expected : infos)
 	{
-		// Try to load the sound data
-		std::string err;
-		audio::sound_data data;
-		if(!audio::load_from_file(expected.id, data, err))
-		{
-			audio::error() << "Failed to load sound : " << err;
-			continue;
-		}
+		suitepp::test("loading " + expected.id, [&] {
+			std::string err;
+			audio::sound_data data;
+			EXPECT(audio::load_from_file(expected.id, data, err));
 
-		if(expected.bits_per_sample != data.info.bits_per_sample ||
-		   expected.sample_rate != data.info.sample_rate || expected.channels != data.info.channels)
-		{
-			audio::error() << "[FAIL]";
-			audio::error() << "expected : ";
-			audio::error() << to_string(expected);
-			audio::error() << "loaded : ";
-			audio::error() << to_string(data.info);
+			EXPECT(data.info.id.empty() == false);
+			EXPECT(data.info.bits_per_sample == expected.bits_per_sample);
+			EXPECT(data.info.sample_rate == expected.sample_rate);
+			EXPECT(data.info.channels == expected.channels);
+			EXPECT(data.info.frames != 0u);
+			EXPECT(data.info.duration.count() != 0.0);
 
-			continue;
-		}
-		audio::info() << "------------------------------------------";
-		audio::info() << "loaded";
-		audio::info() << to_string(data.info);
-
-		data.convert_to_opposite();
-		data.convert_to_opposite();
-		loaded_sounds.emplace_back(std::move(data));
+			if(err.empty())
+			{
+				audio::info() << to_string(data.info);
+				loaded_sounds.emplace_back(std::move(data));
+			}
+		});
 	}
-	audio::info() << "------------------------------------------";
-	audio::info() << "Playing sounds";
 
+	audio::device device;
 	for(auto& data : loaded_sounds)
 	{
-		audio::info() << "------------------------------------------";
-		audio::info() << "now playing";
-		audio::info() << to_string(data.info);
+		suitepp::test("playback " + data.info.id, [&] {
+			auto code = [&]() {
+				// creating large internal buffer and uploading it at once
+				// can be slow so we can stream it in chunks if we want to
+				bool stream = false;
+				audio::sound sound(std::move(data), stream);
 
-		// creating large internal buffer and uploading it at once
-		// can be slow so we can stream it in chunks if we want to
-		bool stream = false;
-		audio::sound sound(std::move(data), stream);
+				audio::source source;
+				source.bind(sound);
+				source.play();
 
-		audio::source source;
-		source.bind(sound);
-		source.play();
+				while(source.is_playing())
+				{
+					std::this_thread::sleep_for(16067us);
 
-		while(source.is_playing())
-		{
-			std::this_thread::sleep_for(16067us);
+					// you can also append more data to the sound at any time
+					// std::vector<uint8_t> some_next_chunk = ;
+					// sound.append_chunk(std::move(some_next_chunk));
 
-			// you can also append more data to the sound at any time
-			// std::vector<uint8_t> some_next_chunk = ;
-			// sound.append_chunk(std::move(some_next_chunk));
+					source.update_stream();
+				}
+			};
 
-			source.update_stream();
-			audio::info() << source.get_playback_position().count();
-			audio::info() << source.get_playback_position().count() / source.get_playback_duration().count();
-		}
+			EXPECT_NOTHROWS(code());
+		});
 	}
-
 	return 0;
 }
 catch(const audio::exception& e)

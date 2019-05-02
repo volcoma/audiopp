@@ -150,7 +150,10 @@ device_impl::device_impl(const std::string& id)
 	al_check(alDistanceModel(AL_LINEAR_DISTANCE));
 }
 
-device_impl::~device_impl() = default;
+device_impl::~device_impl()
+{
+    set_context_thread(std::thread::id{});
+}
 
 void device_impl::enable()
 {

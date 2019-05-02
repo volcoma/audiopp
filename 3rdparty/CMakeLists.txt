@@ -1,1 +1,2 @@
 add_subdirectory(decoders)
+add_subdirectory(suitepp)
