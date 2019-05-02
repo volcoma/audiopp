@@ -13,25 +13,25 @@ auto load_from_memory_flac(const std::uint8_t* data, std::size_t data_size, soun
 {
 	if(!data)
 	{
-		err = "ERROR : No data to load from.";
+		err = "No data to load from.";
 		return false;
 	}
 	if(!data_size)
 	{
-		err = "ERROR : No data to load from.";
+		err = "No data to load from.";
 		return false;
 	}
 
 	auto decoder = drflac_open_memory(data, data_size);
 	if(!decoder)
 	{
-		err = "ERROR : Incorrect flac header.";
+		err = "Incorrect flac header.";
 		return false;
 	}
 
 	if(decoder->totalPCMFrameCount == 0)
 	{
-		err = "ERROR : No frames loaded.";
+		err = "No frames loaded.";
 		drflac_close(decoder);
 		return false;
 	}

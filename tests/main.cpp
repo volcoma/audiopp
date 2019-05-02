@@ -23,9 +23,10 @@ void add_expected_info(std::vector<audio::sound_info>& infos, const std::string&
 int main() try
 {
 	audio::set_info_logger([](const std::string& msg) { std::cout << msg << std::endl; });
-	audio::set_error_logger([](const std::string& msg) { std::cout << msg << std::endl; });
+	audio::set_trace_logger([](const std::string& msg) { std::cout << msg << std::endl; });
+	audio::set_error_logger([](const std::string& msg) { std::cout << "[error] " << msg << std::endl; });
 
-	audio::info() << audio::device::enumerate_devices();
+	audio::device::print_devices();
 
 	// initialize the audio device
 	audio::device device;

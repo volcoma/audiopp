@@ -98,33 +98,30 @@ auto device::default_capture_device() -> std::string
     return detail::device_impl::default_capture_device();
 }
 
-auto device::enumerate_devices() -> std::string
+void device::print_devices()
 {
-    std::stringstream ss;
-	ss << "------------------------------------------\n";
+	info() << "------------------------------------------";
 
 	auto playback_devices = enumerate_playback_devices();
-	ss << "Supported audio playback devices:\n";
+	info() << "Supported audio playback devices:";
 	for(const auto& dev : playback_devices)
 	{
-		ss << "-- " << dev << "\n";
+		info() << "-- " << dev;
 	}
 	auto default_playback = default_playback_device();
-	ss << "Default audio playback device:\n";
-	ss << "-- " << default_playback << "\n";
+	info() << "Default audio playback device:";
+	info() << "-- " << default_playback;
 
 	auto capture_devices = enumerate_capture_devices();
-	ss << "Supported audio capture devices:\n";
+	info() << "Supported audio capture devices:";
 	for(const auto& dev : capture_devices)
 	{
-		ss << "-- " << dev << "\n";
+		info() << "-- " << dev;
 	}
 
 	auto default_capture = default_capture_device();
-	ss << "Default audio capture device:\n";
-	ss << "-- " << default_capture << "\n";
-	ss << "------------------------------------------";
-
-	return ss.str();
+	info() << "Default audio capture device:";
+	info() << "-- " << default_capture;
+	info() << "------------------------------------------";
 }
 } // namespace audio

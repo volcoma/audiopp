@@ -10,12 +10,12 @@ auto load_from_memory_ogg(const std::uint8_t* data, std::size_t data_size, sound
 {
 	if(!data)
 	{
-		err = "ERROR : No data to load from.";
+		err = "No data to load from.";
 		return false;
 	}
 	if(!data_size)
 	{
-		err = "ERROR : No data to load from.";
+		err = "No data to load from.";
 		return false;
 	}
 
@@ -25,7 +25,7 @@ auto load_from_memory_ogg(const std::uint8_t* data, std::size_t data_size, sound
 	if(!decoder)
 	{
 		auto decoded_err = STBVorbisError(vorb_err);
-		err = "ERROR : Vorbis error code : " + std::to_string(decoded_err);
+		err = "Vorbis error code : " + std::to_string(decoded_err);
 		return false;
 	}
 	stb_vorbis_info decoded_info = stb_vorbis_get_info(decoder);

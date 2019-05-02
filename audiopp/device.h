@@ -84,7 +84,7 @@ public:
     //-----------------------------------------------------------------------------
 	/// Enumerate and devices.
 	//-----------------------------------------------------------------------------
-    static auto enumerate_devices() -> std::string;
+    static void print_devices();
 
 private:
 	/// pimpl idiom

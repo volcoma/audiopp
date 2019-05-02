@@ -11,12 +11,12 @@ auto load_from_memory_mp3(const std::uint8_t* data, std::size_t data_size, sound
 {
 	if(!data)
 	{
-		err = "ERROR : No data to load from.";
+		err = "No data to load from.";
 		return false;
 	}
 	if(!data_size)
 	{
-		err = "ERROR : No data to load from.";
+		err = "No data to load from.";
 		return false;
 	}
 
@@ -26,7 +26,7 @@ auto load_from_memory_mp3(const std::uint8_t* data, std::size_t data_size, sound
 
 	if(decoded_info.samples == 0)
 	{
-		err = "ERROR : No frames loaded.";
+		err = "No frames loaded.";
 		return false;
 	}
 
