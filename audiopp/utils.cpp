@@ -41,7 +41,7 @@ auto convert_to_mono(const std::vector<std::uint8_t>& stereo_samples, std::uint8
 
 		for(size_t j = 0; j < bytes_per_sample; ++j)
 		{
-			const auto sample_part = std::uint8_t(mono_sample >> (j * 8)) & 0xff;
+			const auto sample_part = std::uint8_t((mono_sample >> (j * 8)) & 0xff);
 			output.emplace_back(sample_part);
 		}
 	}

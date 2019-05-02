@@ -13,6 +13,8 @@ struct sound_info
 
 	/// id of the sound
 	std::string id{};
+	/// duration of the sound in seconds
+	duration_t loading = duration_t(0);
 
 	/// duration of the sound in seconds
 	duration_t duration = duration_t(0);
@@ -46,6 +48,9 @@ inline auto to_string(const audio::sound_info& info) -> std::string
 	ss << "\n";
 
 	ss << "duration    : " << info.duration.count() << " seconds";
+	ss << "\n";
+	ss << "loaded for  : " << info.loading.count() << " seconds";
+
 	return ss.str();
 }
 

@@ -1,9 +1,8 @@
 #include "../logger.h"
+#include "decoder_mp3.h"
 #include "loader.h"
-#include "minimp3_ex.h"
 
 #include <cstring>
-#include <iostream>
 namespace audio
 {
 
@@ -41,11 +40,12 @@ bool load_mp3_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 	auto seconds = (duration_rep(info.samples) / duration_rep(info.channels)) / duration_rep(info.hz);
 
 	result.info.duration = sound_info::duration_t(seconds);
-	result.data.resize(data_bytes, 0);
+	result.data.resize(data_bytes);
 
 	std::memcpy(result.data.data(), info.buffer, result.data.size());
 
 	err = {};
+
 	return true;
 }
 } // namespace audio

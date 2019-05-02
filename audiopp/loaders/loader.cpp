@@ -108,7 +108,10 @@ auto load_from_memory(const uint8_t* data, size_t size, sound_data& result, std:
 	{
 		success |= load_mp3_from_memory(data, size, result, err);
 	}
-
+	if(!success)
+	{
+		success |= load_flac_from_memory(data, size, result, err);
+	}
 	return success;
 }
 
@@ -171,6 +174,27 @@ auto load_mp3_from_file(const std::string& path, sound_data& result, std::string
 	return true;
 }
 
+auto load_flac_from_file(const std::string& path, sound_data& result, std::string& err) -> bool
+{
+	err = {};
+
+	byte_array_t buffer;
+	if(!load_file(path, buffer))
+	{
+		err = "Failed to load file : " + path;
+		return false;
+	}
+
+	if(!load_flac_from_memory(buffer.data(), buffer.size(), result, err))
+	{
+		return false;
+	}
+
+	result.info.id = path;
+
+	return true;
+}
+
 auto load_from_file(const std::string& path, sound_data& result, std::string& err) -> bool
 {
 	auto ext = get_extension(path);
@@ -186,7 +210,10 @@ auto load_from_file(const std::string& path, sound_data& result, std::string& er
 	{
 		return load_mp3_from_file(path, result, err);
 	}
-
+	else if(ext == "flac")
+	{
+		return load_flac_from_file(path, result, err);
+	}
 	err = "Unsupported audio file format : " + ext;
 	return false;
 }

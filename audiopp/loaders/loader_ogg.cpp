@@ -1,6 +1,6 @@
 #include "../logger.h"
+#include "decoder_vorbis.h"
 #include "loader.h"
-#include "stb_vorbis.h"
 
 namespace audio
 {
@@ -20,7 +20,7 @@ bool load_ogg_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 	}
 
 	int vorb_err = 0;
-	auto* oss = stb_vorbis_open_memory(data, static_cast<int>(data_size), &vorb_err, nullptr);
+	auto oss = stb_vorbis_open_memory(data, static_cast<int>(data_size), &vorb_err, nullptr);
 
 	if(!oss)
 	{
@@ -42,13 +42,14 @@ bool load_ogg_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 	auto seconds = duration_rep(stb_vorbis_stream_length_in_seconds(oss));
 
 	result.info.duration = sound_info::duration_t(seconds);
-	result.data.resize(data_bytes, 0);
+	result.data.resize(data_bytes);
 
 	stb_vorbis_get_samples_short_interleaved(
 		oss, info.channels, reinterpret_cast<std::int16_t*>(result.data.data()), int(data_bytes));
 
 	stb_vorbis_close(oss);
 	err = {};
+
 	return true;
 }
 } // namespace audio

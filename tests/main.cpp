@@ -32,13 +32,14 @@ int main() try
 
 	std::vector<audio::sound_info> infos;
 
-	add_expected_info(infos, DATA "pcm0822m.wav", 22050, 1, 1);
+	// wav loader will force 2 bytes per sample
+	add_expected_info(infos, DATA "pcm0822m.wav", 22050, 2, 1);
 	add_expected_info(infos, DATA "pcm1622m.wav", 22050, 2, 1);
-	add_expected_info(infos, DATA "pcm0822s.wav", 22050, 1, 2);
+	add_expected_info(infos, DATA "pcm0822s.wav", 22050, 2, 2);
 	add_expected_info(infos, DATA "pcm1622s.wav", 22050, 2, 2);
-	add_expected_info(infos, DATA "pcm0844m.wav", 44100, 1, 1);
+	add_expected_info(infos, DATA "pcm0844m.wav", 44100, 2, 1);
 	add_expected_info(infos, DATA "pcm1644m.wav", 44100, 2, 1);
-	add_expected_info(infos, DATA "pcm0844s.wav", 44100, 1, 2);
+	add_expected_info(infos, DATA "pcm0844s.wav", 44100, 2, 2);
 	add_expected_info(infos, DATA "pcm1644s.wav", 44100, 2, 2);
 
 	// ogg loader will force 2 bytes per sample
@@ -61,6 +62,16 @@ int main() try
 	add_expected_info(infos, DATA "pcm0844s.mp3", 44100, 2, 2);
 	add_expected_info(infos, DATA "pcm1644s.mp3", 44100, 2, 2);
 
+	// flac loader will force 2 bytes per sample
+	add_expected_info(infos, DATA "pcm0822m.flac", 22050, 2, 1);
+	add_expected_info(infos, DATA "pcm1622m.flac", 22050, 2, 1);
+	add_expected_info(infos, DATA "pcm0822s.flac", 22050, 2, 2);
+	add_expected_info(infos, DATA "pcm1622s.flac", 22050, 2, 2);
+	add_expected_info(infos, DATA "pcm0844m.flac", 44100, 2, 1);
+	add_expected_info(infos, DATA "pcm1644m.flac", 44100, 2, 1);
+	add_expected_info(infos, DATA "pcm0844s.flac", 44100, 2, 2);
+	add_expected_info(infos, DATA "pcm1644s.flac", 44100, 2, 2);
+
 	std::vector<audio::sound_data> loaded_sounds;
 
 	for(const auto& expected : infos)
@@ -70,7 +81,7 @@ int main() try
 		audio::sound_data data;
 		if(!audio::load_from_file(expected.id, data, err))
 		{
-			audio::error() << "Failed to load sound data";
+			audio::error() << "Failed to load sound : " << err;
 			continue;
 		}
 
@@ -88,6 +99,9 @@ int main() try
 		audio::info() << "------------------------------------------";
 		audio::info() << "loaded";
 		audio::info() << to_string(data.info);
+
+		data.convert_to_opposite();
+		data.convert_to_opposite();
 		loaded_sounds.emplace_back(std::move(data));
 	}
 	audio::info() << "------------------------------------------";
@@ -117,6 +131,8 @@ int main() try
 			// sound.append_chunk(std::move(some_next_chunk));
 
 			source.update_stream();
+			audio::info() << source.get_playback_position().count();
+			audio::info() << source.get_playback_position().count() / source.get_playback_duration().count();
 		}
 	}
 

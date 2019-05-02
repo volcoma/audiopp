@@ -1,11 +1,15 @@
 #include "../logger.h"
-#include "decoder_wav.h"
+#include "decoder_flac.h"
 #include "loader.h"
+
+#include <cstring>
+#include <iostream>
+#include <memory>
 namespace audio
 {
 
-bool load_wav_from_memory(const std::uint8_t* data, std::size_t data_size, sound_data& result,
-						  std::string& err)
+bool load_flac_from_memory(const std::uint8_t* data, std::size_t data_size, sound_data& result,
+						   std::string& err)
 {
 	if(!data)
 	{
@@ -18,7 +22,7 @@ bool load_wav_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 		return false;
 	}
 
-	auto decoder = drwav_open_memory(data, data_size);
+	auto decoder = drflac_open_memory(data, data_size);
 	if(!decoder)
 	{
 		err = "ERROR : Incorrect wav header";
@@ -28,7 +32,7 @@ bool load_wav_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 	if(decoder->totalPCMFrameCount == 0)
 	{
 		err = "ERROR : No data to load from.";
-		drwav_close(decoder);
+		drflac_close(decoder);
 		return false;
 	}
 
@@ -45,16 +49,15 @@ bool load_wav_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 	result.info.duration = sound_info::duration_t(seconds);
 	result.data.resize(data_bytes);
 
-	size_t frames_read = drwav_read_pcm_frames_s16(decoder, decoder->totalPCMFrameCount,
-												   reinterpret_cast<drwav_int16*>(result.data.data()));
+	size_t frames_read = drflac_read_pcm_frames_s16(decoder, decoder->totalPCMFrameCount,
+													reinterpret_cast<drflac_int16*>(result.data.data()));
 
 	if(frames_read != decoder->totalPCMFrameCount)
 	{
 		result = {};
 	}
 
-	drwav_close(decoder);
-
+	drflac_close(decoder);
 	err = {};
 
 	return true;
