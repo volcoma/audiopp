@@ -39,8 +39,8 @@ bool load_flac_from_memory(const std::uint8_t* data, std::size_t data_size, soun
 	result.info.channels = std::uint8_t(decoder->channels);
 	result.info.sample_rate = std::uint32_t(decoder->sampleRate);
 	result.info.bytes_per_sample = sizeof(std::int16_t);
-	size_t total_samples = decoder->totalSampleCount;
-	std::size_t data_bytes = total_samples * result.info.bytes_per_sample;
+	auto total_samples = std::size_t(decoder->totalSampleCount);
+	auto data_bytes = std::size_t(total_samples * result.info.bytes_per_sample);
 
 	using duration_rep = sound_info::duration_t::rep;
 	auto seconds = (duration_rep(total_samples) / duration_rep(result.info.channels)) /
@@ -49,10 +49,10 @@ bool load_flac_from_memory(const std::uint8_t* data, std::size_t data_size, soun
 	result.info.duration = sound_info::duration_t(seconds);
 	result.data.resize(data_bytes);
 
-	size_t frames_read = drflac_read_pcm_frames_s16(decoder, decoder->totalPCMFrameCount,
-													reinterpret_cast<drflac_int16*>(result.data.data()));
+	auto frames_read = drflac_read_pcm_frames_s16(decoder, std::uint64_t(decoder->totalPCMFrameCount),
+												  reinterpret_cast<std::int16_t*>(result.data.data()));
 
-	if(frames_read != decoder->totalPCMFrameCount)
+	if(frames_read != std::uint64_t(decoder->totalPCMFrameCount))
 	{
 		result = {};
 	}
