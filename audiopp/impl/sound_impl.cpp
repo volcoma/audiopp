@@ -19,16 +19,16 @@ static auto get_format(const sound_info& info) -> ALenum
 	{
 		case 1:
 		{
-			switch(info.bytes_per_sample)
+			switch(info.bits_per_sample)
 			{
-				case 1:
+				case 8:
 					format = AL_FORMAT_MONO8;
 					break;
-				case 2:
+				case 16:
 					format = AL_FORMAT_MONO16;
 					break;
 				default:
-					error() << "Unsupported bytes per sample count : " << uint32_t(info.bytes_per_sample);
+					error() << "Unsupported bits per sample count : " << uint32_t(info.bits_per_sample);
 					break;
 			}
 		}
@@ -36,16 +36,16 @@ static auto get_format(const sound_info& info) -> ALenum
 
 		case 2:
 		{
-			switch(info.bytes_per_sample)
+			switch(info.bits_per_sample)
 			{
-				case 1:
+				case 8:
 					format = AL_FORMAT_STEREO8;
 					break;
-				case 2:
+				case 16:
 					format = AL_FORMAT_STEREO16;
 					break;
 				default:
-					error() << "Unsupported bytes per sample count : " << uint32_t(info.bytes_per_sample);
+					error() << "Unsupported bits per sample count : " << uint32_t(info.bits_per_sample);
 					break;
 			}
 		}
@@ -139,8 +139,9 @@ auto sound_impl::get_info() const -> const sound_info&
 
 auto sound_impl::get_byte_size_for(sound_info::duration_t desired_duration) const -> size_t
 {
+	auto bytes_per_sample = info_.bits_per_sample / 8u;
 	return static_cast<size_t>(desired_duration.count() *
-							   double(info_.sample_rate * info_.channels * info_.bytes_per_sample));
+							   double(info_.sample_rate * info_.channels * bytes_per_sample));
 }
 
 auto sound_impl::append_chunk(std::vector<uint8_t>&& data) -> bool

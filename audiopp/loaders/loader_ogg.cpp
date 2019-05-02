@@ -5,8 +5,8 @@
 namespace audio
 {
 
-bool load_ogg_from_memory(const std::uint8_t* data, std::size_t data_size, sound_data& result,
-						  std::string& err)
+auto load_from_memory_ogg(const std::uint8_t* data, std::size_t data_size, sound_data& result,
+						  std::string& err) -> bool
 {
 	if(!data)
 	{
@@ -20,36 +20,32 @@ bool load_ogg_from_memory(const std::uint8_t* data, std::size_t data_size, sound
 	}
 
 	int vorb_err = 0;
-	auto oss = stb_vorbis_open_memory(data, static_cast<int>(data_size), &vorb_err, nullptr);
+	auto decoder = stb_vorbis_open_memory(data, static_cast<int>(data_size), &vorb_err, nullptr);
 
-	if(!oss)
+	if(!decoder)
 	{
 		auto decoded_err = STBVorbisError(vorb_err);
 		err = "ERROR : Vorbis error code : " + std::to_string(decoded_err);
 		return false;
 	}
-	stb_vorbis_info info = stb_vorbis_get_info(oss);
-	result.info.channels = std::uint8_t(info.channels);
-	result.info.sample_rate = info.sample_rate;
-	result.info.bytes_per_sample = sizeof(std::int16_t);
+	stb_vorbis_info decoded_info = stb_vorbis_get_info(decoder);
 
-	auto stream_len_in_samples = std::size_t(stb_vorbis_stream_length_in_samples(oss));
+	using duration_t = sound_info::duration_t;
+	auto& info = result.info;
+	info.channels = std::uint8_t(decoded_info.channels);
+	info.sample_rate = std::uint32_t(decoded_info.sample_rate);
+	info.bits_per_sample = 16;
+	info.frames = std::uint64_t(stb_vorbis_stream_length_in_samples(decoder));
+	info.duration = duration_t(duration_t::rep(info.frames) / duration_t::rep(info.sample_rate));
 
-	std::size_t data_bytes =
-		(stream_len_in_samples * std::size_t(info.channels)) * result.info.bytes_per_sample;
-
-	using duration_rep = sound_info::duration_t::rep;
-	auto seconds = duration_rep(stb_vorbis_stream_length_in_seconds(oss));
-
-	result.info.duration = sound_info::duration_t(seconds);
+	auto data_bytes = std::size_t(info.frames * info.channels * (info.bits_per_sample / 8u));
 	result.data.resize(data_bytes);
 
 	stb_vorbis_get_samples_short_interleaved(
-		oss, info.channels, reinterpret_cast<std::int16_t*>(result.data.data()), int(data_bytes));
+		decoder, info.channels, reinterpret_cast<std::int16_t*>(result.data.data()), int(data_bytes));
 
-	stb_vorbis_close(oss);
+	stb_vorbis_close(decoder);
 	err = {};
-
 	return true;
 }
 } // namespace audio

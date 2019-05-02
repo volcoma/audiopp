@@ -13,8 +13,6 @@ struct sound_info
 
 	/// id of the sound
 	std::string id{};
-	/// duration of the sound in seconds
-	duration_t loading = duration_t(0);
 
 	/// duration of the sound in seconds
 	duration_t duration = duration_t(0);
@@ -23,10 +21,13 @@ struct sound_info
 	std::uint32_t sample_rate = 0;
 
 	/// bytes per sample (sample size)
-	std::uint8_t bytes_per_sample = 2;
+	std::uint8_t bits_per_sample = 16;
 
 	/// channel count of the sound. e.g mono/stereo
 	std::uint8_t channels = 0;
+
+	/// frames count, basically samples / channels
+	std::uint64_t frames = 0;
 };
 
 } // namespace audio
@@ -37,8 +38,7 @@ inline auto to_string(const audio::sound_info& info) -> std::string
 	ss << "id          : " << info.id;
 	ss << "\n";
 
-	ss << "sample size : " << uint32_t(info.bytes_per_sample) << " byte"
-	   << (info.bytes_per_sample > 1 ? "s" : "") << " (" << uint32_t(info.bytes_per_sample * 8) << " bits)";
+	ss << "sample size : " << uint32_t(info.bits_per_sample) << " bits";
 	ss << "\n";
 
 	ss << "sample rate : " << info.sample_rate << " hz";
@@ -47,9 +47,10 @@ inline auto to_string(const audio::sound_info& info) -> std::string
 	ss << "channels    : " << uint32_t(info.channels);
 	ss << "\n";
 
-	ss << "duration    : " << info.duration.count() << " seconds";
+	ss << "frames      : " << info.frames;
 	ss << "\n";
-	ss << "loaded for  : " << info.loading.count() << " seconds";
+
+	ss << "duration    : " << info.duration.count() << " seconds";
 
 	return ss.str();
 }
@@ -57,7 +58,7 @@ inline auto to_string(const audio::sound_info& info) -> std::string
 inline auto operator==(const audio::sound_info& lhs, const audio::sound_info& rhs) -> bool
 {
 	return lhs.id == rhs.id && lhs.sample_rate == rhs.sample_rate &&
-		   lhs.bytes_per_sample == rhs.bytes_per_sample && lhs.channels == rhs.channels &&
+		   lhs.bits_per_sample == rhs.bits_per_sample && lhs.channels == rhs.channels &&
 		   lhs.duration == rhs.duration;
 }
 

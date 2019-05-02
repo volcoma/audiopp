@@ -8,8 +8,8 @@
 namespace audio
 {
 
-bool load_flac_from_memory(const std::uint8_t* data, std::size_t data_size, sound_data& result,
-						   std::string& err)
+auto load_from_memory_flac(const std::uint8_t* data, std::size_t data_size, sound_data& result,
+						   std::string& err) -> bool
 {
 	if(!data)
 	{
@@ -25,41 +25,38 @@ bool load_flac_from_memory(const std::uint8_t* data, std::size_t data_size, soun
 	auto decoder = drflac_open_memory(data, data_size);
 	if(!decoder)
 	{
-		err = "ERROR : Incorrect wav header";
+		err = "ERROR : Incorrect flac header.";
 		return false;
 	}
 
 	if(decoder->totalPCMFrameCount == 0)
 	{
-		err = "ERROR : No data to load from.";
+		err = "ERROR : No frames loaded.";
 		drflac_close(decoder);
 		return false;
 	}
 
-	result.info.channels = std::uint8_t(decoder->channels);
-	result.info.sample_rate = std::uint32_t(decoder->sampleRate);
-	result.info.bytes_per_sample = sizeof(std::int16_t);
-	auto total_samples = std::size_t(decoder->totalSampleCount);
-	auto data_bytes = std::size_t(total_samples * result.info.bytes_per_sample);
+	using duration_t = sound_info::duration_t;
+	auto& info = result.info;
+	info.channels = std::uint8_t(decoder->channels);
+	info.sample_rate = std::uint32_t(decoder->sampleRate);
+	info.bits_per_sample = 16;
+	info.frames = std::uint64_t(decoder->totalPCMFrameCount);
+	info.duration = duration_t(duration_t::rep(info.frames) / duration_t::rep(info.sample_rate));
 
-	using duration_rep = sound_info::duration_t::rep;
-	auto seconds = (duration_rep(total_samples) / duration_rep(result.info.channels)) /
-				   duration_rep(result.info.sample_rate);
-
-	result.info.duration = sound_info::duration_t(seconds);
+	auto data_bytes = std::size_t(info.frames * info.channels * (info.bits_per_sample / 8u));
 	result.data.resize(data_bytes);
 
-	auto frames_read = drflac_read_pcm_frames_s16(decoder, std::uint64_t(decoder->totalPCMFrameCount),
-												  reinterpret_cast<std::int16_t*>(result.data.data()));
+	auto frames_read =
+		drflac_read_pcm_frames_s16(decoder, info.frames, reinterpret_cast<std::int16_t*>(result.data.data()));
 
-	if(frames_read != std::uint64_t(decoder->totalPCMFrameCount))
+	if(frames_read != info.frames)
 	{
 		result = {};
 	}
 
 	drflac_close(decoder);
 	err = {};
-
 	return true;
 }
 } // namespace audio

@@ -9,7 +9,7 @@ void sound_data::convert_to_mono()
 {
 	if(info.channels == 2)
 	{
-		data = utils::convert_to_mono(data, info.bytes_per_sample);
+		data = utils::convert_to_mono(data, info.bits_per_sample);
 		info.channels = 1;
 	}
 	else if(info.channels > 2)
@@ -22,7 +22,7 @@ void sound_data::convert_to_stereo()
 {
 	if(info.channels == 1)
 	{
-		data = utils::convert_to_stereo(data, info.bytes_per_sample);
+		data = utils::convert_to_stereo(data, info.bits_per_sample);
 		info.channels = 2;
 	}
 	else if(info.channels > 2)

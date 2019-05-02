@@ -6,9 +6,9 @@ namespace audio
 {
 namespace detail
 {
+
 template <typename Container = std::string, typename CharT = char, typename Traits = std::char_traits<char>>
-auto read_stream_into_container(std::basic_istream<CharT, Traits>& in,
-								typename Container::allocator_type alloc = {}) -> Container
+auto read_stream(std::basic_istream<CharT, Traits>& in, Container& container) -> bool
 {
 	static_assert(
 		// Allow only strings...
@@ -26,48 +26,42 @@ auto read_stream_into_container(std::basic_istream<CharT, Traits>& in,
 	auto const start_pos = in.tellg();
 	if(std::streamsize(-1) == start_pos)
 	{
-		throw std::ios_base::failure{"error"};
+		return false;
 	};
 
 	if(!in.seekg(0, std::ios_base::end))
 	{
-		throw std::ios_base::failure{"error"};
+		return false;
 	};
 
 	auto const end_pos = in.tellg();
 
 	if(std::streamsize(-1) == end_pos)
 	{
-		throw std::ios_base::failure{"error"};
+		return false;
 	};
 
 	auto const char_count = end_pos - start_pos;
 
 	if(!in.seekg(start_pos))
 	{
-		throw std::ios_base::failure{"error"};
+		return false;
 	};
 
-	Container container(std::move(alloc));
 	container.resize(static_cast<std::size_t>(char_count));
 
 	if(!container.empty())
 	{
 		if(!in.read(reinterpret_cast<CharT*>(&container[0]), char_count))
 		{
-			throw std::ios_base::failure{"error"};
+			return false;
 		};
 	}
 
-	return container;
+	return true;
 }
 } // namespace detail
 using byte_array_t = std::vector<uint8_t>;
-
-auto read_stream(std::istream& stream) -> byte_array_t
-{
-	return detail::read_stream_into_container<byte_array_t>(stream);
-}
 
 auto get_extension(const std::string& path) -> std::string
 {
@@ -89,8 +83,7 @@ auto load_file(const std::string& path, byte_array_t& buffer) -> bool
 		return false;
 	}
 
-	buffer = read_stream(stream);
-	return true;
+	return detail::read_stream(stream, buffer);
 }
 
 auto load_from_memory(const uint8_t* data, size_t size, sound_data& result, std::string& err) -> bool
@@ -98,27 +91,25 @@ auto load_from_memory(const uint8_t* data, size_t size, sound_data& result, std:
 	bool success = false;
 	if(!success)
 	{
-		success |= load_wav_from_memory(data, size, result, err);
+		success = load_from_memory_wav(data, size, result, err);
 	}
 	if(!success)
 	{
-		success |= load_ogg_from_memory(data, size, result, err);
+		success = load_from_memory_ogg(data, size, result, err);
 	}
 	if(!success)
 	{
-		success |= load_mp3_from_memory(data, size, result, err);
+		success = load_from_memory_mp3(data, size, result, err);
 	}
 	if(!success)
 	{
-		success |= load_flac_from_memory(data, size, result, err);
+		success = load_from_memory_flac(data, size, result, err);
 	}
 	return success;
 }
 
-auto load_ogg_from_file(const std::string& path, sound_data& result, std::string& err) -> bool
+auto load_from_file_ogg(const std::string& path, sound_data& result, std::string& err) -> bool
 {
-	err = {};
-
 	byte_array_t buffer;
 	if(!load_file(path, buffer))
 	{
@@ -126,7 +117,7 @@ auto load_ogg_from_file(const std::string& path, sound_data& result, std::string
 		return false;
 	}
 
-	if(!load_ogg_from_memory(buffer.data(), buffer.size(), result, err))
+	if(!load_from_memory_ogg(buffer.data(), buffer.size(), result, err))
 	{
 		return false;
 	}
@@ -134,10 +125,8 @@ auto load_ogg_from_file(const std::string& path, sound_data& result, std::string
 	result.info.id = path;
 	return true;
 }
-auto load_wav_from_file(const std::string& path, sound_data& result, std::string& err) -> bool
+auto load_from_file_wav(const std::string& path, sound_data& result, std::string& err) -> bool
 {
-	err = {};
-
 	byte_array_t buffer;
 	if(!load_file(path, buffer))
 	{
@@ -145,7 +134,7 @@ auto load_wav_from_file(const std::string& path, sound_data& result, std::string
 		return false;
 	}
 
-	if(!load_wav_from_memory(buffer.data(), buffer.size(), result, err))
+	if(!load_from_memory_wav(buffer.data(), buffer.size(), result, err))
 	{
 		return false;
 	}
@@ -154,10 +143,8 @@ auto load_wav_from_file(const std::string& path, sound_data& result, std::string
 	return true;
 }
 
-auto load_mp3_from_file(const std::string& path, sound_data& result, std::string& err) -> bool
+auto load_from_file_mp3(const std::string& path, sound_data& result, std::string& err) -> bool
 {
-	err = {};
-
 	byte_array_t buffer;
 	if(!load_file(path, buffer))
 	{
@@ -165,7 +152,7 @@ auto load_mp3_from_file(const std::string& path, sound_data& result, std::string
 		return false;
 	}
 
-	if(!load_mp3_from_memory(buffer.data(), buffer.size(), result, err))
+	if(!load_from_memory_mp3(buffer.data(), buffer.size(), result, err))
 	{
 		return false;
 	}
@@ -174,10 +161,8 @@ auto load_mp3_from_file(const std::string& path, sound_data& result, std::string
 	return true;
 }
 
-auto load_flac_from_file(const std::string& path, sound_data& result, std::string& err) -> bool
+auto load_from_file_flac(const std::string& path, sound_data& result, std::string& err) -> bool
 {
-	err = {};
-
 	byte_array_t buffer;
 	if(!load_file(path, buffer))
 	{
@@ -185,35 +170,36 @@ auto load_flac_from_file(const std::string& path, sound_data& result, std::strin
 		return false;
 	}
 
-	if(!load_flac_from_memory(buffer.data(), buffer.size(), result, err))
+	if(!load_from_memory_flac(buffer.data(), buffer.size(), result, err))
 	{
 		return false;
 	}
 
 	result.info.id = path;
-
 	return true;
 }
 
 auto load_from_file(const std::string& path, sound_data& result, std::string& err) -> bool
 {
 	auto ext = get_extension(path);
-	if(ext == "wav")
+
+	if(ext == "wav" || ext == "wave")
 	{
-		return load_wav_from_file(path, result, err);
+		return load_from_file_wav(path, result, err);
 	}
 	else if(ext == "ogg")
 	{
-		return load_ogg_from_file(path, result, err);
-	}
-	else if(ext == "mp3")
-	{
-		return load_mp3_from_file(path, result, err);
+		return load_from_file_ogg(path, result, err);
 	}
 	else if(ext == "flac")
 	{
-		return load_flac_from_file(path, result, err);
+		return load_from_file_flac(path, result, err);
 	}
+	else if(ext == "mp3")
+	{
+		return load_from_file_mp3(path, result, err);
+	}
+
 	err = "Unsupported audio file format : " + ext;
 	return false;
 }
