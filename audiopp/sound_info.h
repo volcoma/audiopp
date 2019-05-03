@@ -15,19 +15,19 @@ struct sound_info
 	std::string id{};
 
 	/// duration of the sound in seconds
-	duration_t duration = duration_t(0);
+	duration_t duration{};
 
 	/// sample rate (samples per second) of the sound (hz)
-	std::uint32_t sample_rate = 0;
+	std::uint32_t sample_rate{};
 
 	/// bytes per sample (sample size)
-	std::uint8_t bits_per_sample = 16;
+	std::uint8_t bits_per_sample{};
 
 	/// channel count of the sound. e.g mono/stereo
-	std::uint8_t channels = 0;
+	std::uint8_t channels{};
 
-	/// frames count, basically samples / channels
-	std::uint64_t frames = 0;
+	/// frames count (samples per channel)
+	std::uint64_t frames{};
 };
 
 } // namespace audio

@@ -44,6 +44,7 @@ auto load_from_memory_ogg(const std::uint8_t* data, std::size_t data_size, sound
 
 	auto frames_read = std::uint64_t(stb_vorbis_get_samples_short_interleaved(
 		decoder, info.channels, reinterpret_cast<std::int16_t*>(result.data.data()), int(num_samples)));
+
 	stb_vorbis_close(decoder);
 
 	if(frames_read != info.frames)
