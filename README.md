@@ -13,11 +13,9 @@ int main()
     // Try to load the sound data
     std::string err;
     audio::sound_data data;
-    std::string sample = "some_sample.wav";
-  
-    if(!audio::load_from_file(sample, data, err))
+    if(!audio::load_from_file("some_sample.wav", data, err))
     {
-        audio::log_error("Failed to load sound data : " + err);
+        audio::error() << "Failed to load sound data : " << err;
         return -1;
     }
     
@@ -30,15 +28,25 @@ int main()
     
     // 3d positioning only work with mono sounds
     // so if you want this functionality make sure you
-    // load a mono sound
+    // play a mono sound
     listener.set_position({0, 0, 0});
     
     // create the sound from the sound data
     audio::sound sound(std::move(data));
-    audio::source source;
 
-    // bind the sound to a source
+    // create a source
+    audio::source source;
+    // bind the sound to the source
     source.bind(sound);
+    
+    // adjust source properties (optional)
+    source.set_volume(0.8f);
+    source.set_pitch(1.0f);
+    // 3d positioning only work with mono sounds
+    // so if you want this functionality make sure you
+    // play a mono sound
+    source.set_position({0, 0, 0});
+
     source.play();
     while(source.is_playing())
     {
@@ -46,4 +54,5 @@ int main()
     }
     
     return 0;
+}
 ```
