@@ -38,13 +38,22 @@ auto load_from_memory_ogg(const std::uint8_t* data, std::size_t data_size, sound
 	info.frames = std::uint64_t(stb_vorbis_stream_length_in_samples(decoder));
 	info.duration = duration_t(duration_t::rep(info.frames) / duration_t::rep(info.sample_rate));
 
-	auto data_bytes = std::size_t(info.frames * info.channels * (info.bits_per_sample / 8u));
+	auto num_samples = std::size_t(info.frames * info.channels);
+	auto data_bytes = std::size_t(num_samples * (info.bits_per_sample / 8u));
 	result.data.resize(data_bytes);
 
-	stb_vorbis_get_samples_short_interleaved(
-		decoder, info.channels, reinterpret_cast<std::int16_t*>(result.data.data()), int(data_bytes));
-
+	auto frames_read = std::uint64_t(stb_vorbis_get_samples_short_interleaved(
+		decoder, info.channels, reinterpret_cast<std::int16_t*>(result.data.data()), int(num_samples)));
 	stb_vorbis_close(decoder);
+
+	if(frames_read != info.frames)
+	{
+		err = "Could not read all the frames. Read " + std::to_string(frames_read) + "/" +
+			  std::to_string(info.frames);
+		result = {};
+		return false;
+	}
+
 	err = {};
 	return true;
 }

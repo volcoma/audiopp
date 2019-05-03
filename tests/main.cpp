@@ -98,35 +98,35 @@ int main() try
 		});
 	}
 
-	audio::device device;
-	for(auto& data : loaded_sounds)
-	{
-		suitepp::test("playback " + data.info.id, [&] {
-			auto code = [&]() {
-				// creating large internal buffer and uploading it at once
-				// can be slow so we can stream it in chunks if we want to
-				bool stream = false;
-				audio::sound sound(std::move(data), stream);
+//	audio::device device;
+//	for(auto& data : loaded_sounds)
+//	{
+//		suitepp::test("playback " + data.info.id, [&] {
+//			auto code = [&]() {
+//				// creating large internal buffer and uploading it at once
+//				// can be slow so we can stream it in chunks if we want to
+//				bool stream = false;
+//				audio::sound sound(std::move(data), stream);
 
-				audio::source source;
-				source.bind(sound);
-				source.play();
+//				audio::source source;
+//				source.bind(sound);
+//				source.play();
 
-				while(source.is_playing())
-				{
-					std::this_thread::sleep_for(16067us);
+//				while(source.is_playing())
+//				{
+//					std::this_thread::sleep_for(16067us);
 
-					// you can also append more data to the sound at any time
-					// std::vector<uint8_t> some_next_chunk = ;
-					// sound.append_chunk(std::move(some_next_chunk));
+//					// you can also append more data to the sound at any time
+//					// std::vector<uint8_t> some_next_chunk = ;
+//					// sound.append_chunk(std::move(some_next_chunk));
 
-					source.update_stream();
-				}
-			};
+//					source.update_stream();
+//				}
+//			};
 
-			EXPECT_NOTHROWS(code());
-		});
-	}
+//			EXPECT_NOTHROWS(code());
+//		});
+//	}
 	return 0;
 }
 catch(const audio::exception& e)

@@ -30,6 +30,12 @@ auto load_from_memory_mp3(const std::uint8_t* data, std::size_t data_size, sound
 		return false;
 	}
 
+	if(!decoded_info.buffer)
+	{
+		err = "No frames loaded.";
+		return false;
+	}
+
 	using duration_t = sound_info::duration_t;
 	auto& info = result.info;
 	info.channels = std::uint8_t(decoded_info.channels);
@@ -38,7 +44,8 @@ auto load_from_memory_mp3(const std::uint8_t* data, std::size_t data_size, sound
 	info.frames = std::uint64_t(decoded_info.samples) / std::uint64_t(decoded_info.channels);
 	info.duration = duration_t(duration_t::rep(info.frames) / duration_t::rep(info.sample_rate));
 
-	auto data_bytes = std::size_t(info.frames * info.channels * (info.bits_per_sample / 8u));
+	auto num_samples = std::size_t(info.frames * info.channels);
+	auto data_bytes = std::size_t(num_samples * (info.bits_per_sample / 8u));
 	result.data.resize(data_bytes);
 
 	std::memcpy(result.data.data(), decoded_info.buffer, data_bytes);

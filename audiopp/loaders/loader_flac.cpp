@@ -44,18 +44,23 @@ auto load_from_memory_flac(const std::uint8_t* data, std::size_t data_size, soun
 	info.frames = std::uint64_t(decoder->totalPCMFrameCount);
 	info.duration = duration_t(duration_t::rep(info.frames) / duration_t::rep(info.sample_rate));
 
-	auto data_bytes = std::size_t(info.frames * info.channels * (info.bits_per_sample / 8u));
+	auto num_samples = std::size_t(info.frames * info.channels);
+	auto data_bytes = std::size_t(num_samples * (info.bits_per_sample / 8u));
 	result.data.resize(data_bytes);
 
 	auto frames_read =
 		drflac_read_pcm_frames_s16(decoder, info.frames, reinterpret_cast<std::int16_t*>(result.data.data()));
 
+	drflac_close(decoder);
+
 	if(frames_read != info.frames)
 	{
+		err = "Could not read all the frames. Read " + std::to_string(frames_read) + "/" +
+			  std::to_string(info.frames);
 		result = {};
+		return false;
 	}
 
-	drflac_close(decoder);
 	err = {};
 	return true;
 }
