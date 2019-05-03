@@ -2,12 +2,16 @@
 #include "loader.h"
 #include <decoders/decoder_flac.h>
 
-#include <cstring>
-#include <iostream>
 #include <memory>
 namespace audio
 {
-
+namespace
+{
+void deleter(drflac* decoder)
+{
+	drflac_close(decoder);
+}
+} // namespace
 auto load_from_memory_flac(const std::uint8_t* data, std::size_t data_size, sound_data& result,
 						   std::string& err) -> bool
 {
@@ -22,7 +26,7 @@ auto load_from_memory_flac(const std::uint8_t* data, std::size_t data_size, soun
 		return false;
 	}
 
-	auto decoder = drflac_open_memory(data, data_size);
+	std::unique_ptr<drflac, decltype(&deleter)> decoder(drflac_open_memory(data, data_size), &deleter);
 	if(!decoder)
 	{
 		err = "Incorrect flac header.";
@@ -32,7 +36,6 @@ auto load_from_memory_flac(const std::uint8_t* data, std::size_t data_size, soun
 	if(decoder->totalPCMFrameCount == 0)
 	{
 		err = "No frames loaded.";
-		drflac_close(decoder);
 		return false;
 	}
 
@@ -48,10 +51,8 @@ auto load_from_memory_flac(const std::uint8_t* data, std::size_t data_size, soun
 	auto data_bytes = std::size_t(num_samples * (info.bits_per_sample / 8u));
 	result.data.resize(data_bytes);
 
-	auto frames_read =
-		drflac_read_pcm_frames_s16(decoder, info.frames, reinterpret_cast<std::int16_t*>(result.data.data()));
-
-	drflac_close(decoder);
+	auto frames_read = drflac_read_pcm_frames_s16(decoder.get(), info.frames,
+												  reinterpret_cast<std::int16_t*>(result.data.data()));
 
 	if(frames_read != info.frames)
 	{
