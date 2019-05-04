@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <chrono>
 #include <iostream>
+#include <map>
 #include <string>
 #include <thread>
 
@@ -29,45 +30,37 @@ int main() try
 
 	std::vector<audio::sound_info> infos;
 
-	// wav loader will force 2 bytes per sample
-	add_expected_info(infos, DATA "pcm0822m.wav", 22050, 16, 1);
-	add_expected_info(infos, DATA "pcm1622m.wav", 22050, 16, 1);
-	add_expected_info(infos, DATA "pcm0822s.wav", 22050, 16, 2);
-	add_expected_info(infos, DATA "pcm1622s.wav", 22050, 16, 2);
-	add_expected_info(infos, DATA "pcm0844m.wav", 44100, 16, 1);
-	add_expected_info(infos, DATA "pcm1644m.wav", 44100, 16, 1);
-	add_expected_info(infos, DATA "pcm0844s.wav", 44100, 16, 2);
-	add_expected_info(infos, DATA "pcm1644s.wav", 44100, 16, 2);
+	const std::string& data_path = DATA;
 
-	// ogg loader will force 2 bytes per sample
-	add_expected_info(infos, DATA "pcm0822m.ogg", 22050, 16, 1);
-	add_expected_info(infos, DATA "pcm1622m.ogg", 22050, 16, 1);
-	add_expected_info(infos, DATA "pcm0822s.ogg", 22050, 16, 2);
-	add_expected_info(infos, DATA "pcm1622s.ogg", 22050, 16, 2);
-	add_expected_info(infos, DATA "pcm0844m.ogg", 44100, 16, 1);
-	add_expected_info(infos, DATA "pcm1644m.ogg", 44100, 16, 1);
-	add_expected_info(infos, DATA "pcm0844s.ogg", 44100, 16, 2);
-	add_expected_info(infos, DATA "pcm1644s.ogg", 44100, 16, 2);
+	const std::vector<std::pair<std::string, std::vector<std::string>>> formats = {
+		{"wav", {"pcm08", "pcm16", "pcm24", "pcm32", "ulaw", "alaw", "sngl", "dbl", "ima", "ms"}},
+		{"ogg", {"pcm08", "pcm16", "pcm24", "pcm32"}},
+		{"mp3", {"pcm08", "pcm16", "pcm24", "pcm32"}},
+		{"flac", {"pcm08", "pcm16", "pcm24", "pcm32"}}
 
-	// mp3 loader will force 2 bytes per sample
-	add_expected_info(infos, DATA "pcm0822m.mp3", 22050, 16, 1);
-	add_expected_info(infos, DATA "pcm1622m.mp3", 22050, 16, 1);
-	add_expected_info(infos, DATA "pcm0822s.mp3", 22050, 16, 2);
-	add_expected_info(infos, DATA "pcm1622s.mp3", 22050, 16, 2);
-	add_expected_info(infos, DATA "pcm0844m.mp3", 44100, 16, 1);
-	add_expected_info(infos, DATA "pcm1644m.mp3", 44100, 16, 1);
-	add_expected_info(infos, DATA "pcm0844s.mp3", 44100, 16, 2);
-	add_expected_info(infos, DATA "pcm1644s.mp3", 44100, 16, 2);
+	};
 
-	// flac loader will force 2 bytes per sample
-	add_expected_info(infos, DATA "pcm0822m.flac", 22050, 16, 1);
-	add_expected_info(infos, DATA "pcm1622m.flac", 22050, 16, 1);
-	add_expected_info(infos, DATA "pcm0822s.flac", 22050, 16, 2);
-	add_expected_info(infos, DATA "pcm1622s.flac", 22050, 16, 2);
-	add_expected_info(infos, DATA "pcm0844m.flac", 44100, 16, 1);
-	add_expected_info(infos, DATA "pcm1644m.flac", 44100, 16, 1);
-	add_expected_info(infos, DATA "pcm0844s.flac", 44100, 16, 2);
-	add_expected_info(infos, DATA "pcm1644s.flac", 44100, 16, 2);
+	for(const auto& entry : formats)
+	{
+		const auto& format = entry.first;
+		const auto& sub_formats = entry.second;
+
+		// all loaders will convert to 16 bits per sample
+
+		for(const auto& sub_format : sub_formats)
+		{
+			std::string path = data_path + format + "/" + sub_format;
+			add_expected_info(infos, path + "08m." + format, 8000, 16, 1);
+			add_expected_info(infos, path + "08s." + format, 8000, 16, 2);
+			add_expected_info(infos, path + "11m." + format, 11025, 16, 1);
+			add_expected_info(infos, path + "11s." + format, 11025, 16, 2);
+			add_expected_info(infos, path + "22m." + format, 22050, 16, 1);
+			add_expected_info(infos, path + "22s." + format, 22050, 16, 2);
+			add_expected_info(infos, path + "44m." + format, 44100, 16, 1);
+			add_expected_info(infos, path + "44s." + format, 44100, 16, 2);
+		}
+	}
+
 	std::vector<audio::sound_data> loaded_sounds;
 
 	suitepp::test("device init", [&] {
@@ -83,12 +76,10 @@ int main() try
 			audio::sound_data data;
 			EXPECT(audio::load_from_file(expected.id, data, err));
 
-			EXPECT(data.info.id.empty() == false);
+			EXPECT(!data.info.id.empty());
 			EXPECT(data.info.bits_per_sample == expected.bits_per_sample);
 			EXPECT(data.info.sample_rate == expected.sample_rate);
 			EXPECT(data.info.channels == expected.channels);
-			EXPECT(data.info.frames != 0u);
-			EXPECT(data.info.duration.count() != 0.0);
 
 			if(err.empty())
 			{
@@ -98,35 +89,35 @@ int main() try
 		});
 	}
 
-//	audio::device device;
-//	for(auto& data : loaded_sounds)
-//	{
-//		suitepp::test("playback " + data.info.id, [&] {
-//			auto code = [&]() {
-//				// creating large internal buffer and uploading it at once
-//				// can be slow so we can stream it in chunks if we want to
-//				bool stream = false;
-//				audio::sound sound(std::move(data), stream);
+	//	audio::device device;
+	//	for(auto& data : loaded_sounds)
+	//	{
+	//		suitepp::test("playback " + data.info.id, [&] {
+	//			auto code = [&]() {
+	//				// creating large internal buffer and uploading it at once
+	//				// can be slow so we can stream it in chunks if we want to
+	//				bool stream = false;
+	//				audio::sound sound(std::move(data), stream);
 
-//				audio::source source;
-//				source.bind(sound);
-//				source.play();
+	//				audio::source source;
+	//				source.bind(sound);
+	//				source.play();
 
-//				while(source.is_playing())
-//				{
-//					std::this_thread::sleep_for(16067us);
+	//				while(source.is_playing())
+	//				{
+	//					std::this_thread::sleep_for(16067us);
 
-//					// you can also append more data to the sound at any time
-//					// std::vector<uint8_t> some_next_chunk = ;
-//					// sound.append_chunk(std::move(some_next_chunk));
+	//					// you can also append more data to the sound at any time
+	//					// std::vector<uint8_t> some_next_chunk = ;
+	//					// sound.append_chunk(std::move(some_next_chunk));
 
-//					source.update_stream();
-//				}
-//			};
+	//					source.update_stream();
+	//				}
+	//			};
 
-//			EXPECT_NOTHROWS(code());
-//		});
-//	}
+	//			EXPECT_NOTHROWS(code());
+	//		});
+	//	}
 	return 0;
 }
 catch(const audio::exception& e)
