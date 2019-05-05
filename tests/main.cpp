@@ -33,6 +33,7 @@ int main() try
 	const std::string& data_path = DATA;
 
 	const std::vector<std::pair<std::string, std::vector<std::string>>> formats = {
+
 		{"wav", {"pcm08", "pcm16", "pcm24", "pcm32", "ulaw", "alaw", "sngl", "dbl", "ima", "ms"}},
 		{"ogg", {"pcm08", "pcm16", "pcm24", "pcm32"}},
 		{"mp3", {"pcm08", "pcm16", "pcm24", "pcm32"}},
@@ -40,24 +41,54 @@ int main() try
 
 	};
 
-	for(const auto& entry : formats)
-	{
-		const auto& format = entry.first;
-		const auto& sub_formats = entry.second;
+	const std::vector<std::pair<uint32_t, std::string>> sample_rates = {
 
-		// all loaders will convert to 16 bits per sample
+		{8000u, "08"}, {11025u, "11"}, {22050u, "22"}, {44100u, "44"}
+
+	};
+
+	const std::vector<std::pair<uint8_t, std::string>> channels = {
+
+		{uint8_t(1), "m"}, {uint8_t(2), "s"}
+
+	};
+
+	// all loaders will convert to 16 bits per sample
+	const uint32_t bps = 16;
+
+	for(const auto& format_entry : formats)
+	{
+		const auto& format = format_entry.first;
+		const auto& sub_formats = format_entry.second;
 
 		for(const auto& sub_format : sub_formats)
 		{
-			std::string path = data_path + format + "/" + sub_format;
-			add_expected_info(infos, path + "08m." + format, 8000, 16, 1);
-			add_expected_info(infos, path + "08s." + format, 8000, 16, 2);
-			add_expected_info(infos, path + "11m." + format, 11025, 16, 1);
-			add_expected_info(infos, path + "11s." + format, 11025, 16, 2);
-			add_expected_info(infos, path + "22m." + format, 22050, 16, 1);
-			add_expected_info(infos, path + "22s." + format, 22050, 16, 2);
-			add_expected_info(infos, path + "44m." + format, 44100, 16, 1);
-			add_expected_info(infos, path + "44s." + format, 44100, 16, 2);
+			std::string entry_path;
+			entry_path.append(data_path);
+			entry_path.append(format);
+			entry_path.append("/");
+			entry_path.append(sub_format);
+
+			for(const auto& rate_entry : sample_rates)
+			{
+				const auto& rate_num = rate_entry.first;
+				const auto& rate = rate_entry.second;
+
+				for(const auto& channel_entry : channels)
+				{
+					const auto& channel_num = channel_entry.first;
+					const auto& channel = channel_entry.second;
+
+					std::string path;
+					path.append(entry_path);
+					path.append(rate);
+					path.append(channel);
+					path.append(".");
+					path.append(format);
+
+					add_expected_info(infos, path, rate_num, bps, channel_num);
+				}
+			}
 		}
 	}
 
@@ -73,18 +104,17 @@ int main() try
 	{
 		suitepp::test("loading " + expected.id, [&] {
 			std::string err;
-			audio::sound_data data;
-			EXPECT(audio::load_from_file(expected.id, data, err));
+			audio::sound_data loaded;
+			EXPECT(audio::load_from_file(expected.id, loaded, err));
 
-			EXPECT(!data.info.id.empty());
-			EXPECT(data.info.bits_per_sample == expected.bits_per_sample);
-			EXPECT(data.info.sample_rate == expected.sample_rate);
-			EXPECT(data.info.channels == expected.channels);
+			EXPECT(loaded.info.bits_per_sample == expected.bits_per_sample);
+			EXPECT(loaded.info.sample_rate == expected.sample_rate);
+			EXPECT(loaded.info.channels == expected.channels);
 
 			if(err.empty())
 			{
-				audio::info() << to_string(data.info);
-				loaded_sounds.emplace_back(std::move(data));
+				// audio::info() << to_string(data.info);
+				loaded_sounds.emplace_back(std::move(loaded));
 			}
 		});
 	}
