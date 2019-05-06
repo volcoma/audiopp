@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/volcoma/audiopp.svg?branch=master)](https://travis-ci.org/volcoma/audiopp)
 [![Build status](https://ci.appveyor.com/api/projects/status/ytbigal46vf5kr2t?svg=true)](https://ci.appveyor.com/project/volcoma/audiopp)
 
-## audiopp c++14 audio library
+## audiopp c++14 cross-platform audio library
 - Supports loading of .wav/.ogg/.mp3/.flac formats
 - Supports 3d sounds
 - Basically a thin wrapper over OpenAL
@@ -10,7 +10,7 @@
 ```c++
 int main()
 {
-    // Try to load the sound data
+    // Load the sound data. This can also be done on seperate threads.
     std::string err;
     audio::sound_data data;
     if(!audio::load_from_file("some_sample.wav", data, err))
@@ -26,6 +26,8 @@ int main()
     // per application. 
     audio::listener listener;
     
+    // adjust listener properties (optional)
+    listener.set_volume(0.8f);
     // 3d positioning only work with mono sounds
     // so if you want this functionality make sure you
     // play a mono sound
@@ -36,8 +38,6 @@ int main()
 
     // create a source
     audio::source source;
-    // bind the sound to the source
-    source.bind(sound);
     
     // adjust source properties (optional)
     source.set_volume(0.8f);
@@ -47,6 +47,9 @@ int main()
     // play a mono sound
     source.set_position({0, 0, 0});
 
+    // bind the sound to the source
+    source.bind(sound);
+    // play it
     source.play();
     while(source.is_playing())
     {
