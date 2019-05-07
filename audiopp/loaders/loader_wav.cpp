@@ -5,13 +5,6 @@
 #include <memory>
 namespace audio
 {
-namespace
-{
-void deleter(drwav* decoder)
-{
-	drwav_close(decoder);
-}
-} // namespace
 
 auto load_from_memory_wav(const std::uint8_t* data, std::size_t data_size, sound_data& result,
 						  std::string& err) -> bool
@@ -27,7 +20,10 @@ auto load_from_memory_wav(const std::uint8_t* data, std::size_t data_size, sound
 		return false;
 	}
 
-	std::unique_ptr<drwav, decltype(&deleter)> decoder(drwav_open_memory(data, data_size), &deleter);
+	static const auto deleter = [](drwav* decoder) { drwav_close(decoder); };
+	using decoder_t = std::unique_ptr<drwav, decltype(deleter)>;
+
+	decoder_t decoder(drwav_open_memory(data, data_size), deleter);
 	if(!decoder)
 	{
 		err = "Incorrect wav header.";

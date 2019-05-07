@@ -6,16 +6,6 @@
 #include <memory>
 namespace audio
 {
-namespace
-{
-void deleter(mp3dec_file_info_t* map_info)
-{
-	if(map_info->buffer)
-		free(map_info->buffer);
-
-    delete map_info;
-}
-} // namespace
 
 auto load_from_memory_mp3(const std::uint8_t* data, std::size_t data_size, sound_data& result,
 						  std::string& err) -> bool
@@ -31,10 +21,17 @@ auto load_from_memory_mp3(const std::uint8_t* data, std::size_t data_size, sound
 		return false;
 	}
 
-	mp3dec_t mp3d;
-	std::unique_ptr<mp3dec_file_info_t, decltype(&deleter)> decoder(new mp3dec_file_info_t(), &deleter);
-	mp3dec_load_buf(&mp3d, data, data_size, decoder.get(), nullptr, nullptr);
+	static const auto deleter = [](mp3dec_file_info_t* map_info) {
+		if(map_info->buffer)
+			free(map_info->buffer);
+	};
+	using decoder_t = std::unique_ptr<mp3dec_file_info_t, decltype(deleter)>;
 
+	mp3dec_t mp3d{};
+	mp3dec_file_info_t file_info{};
+	mp3dec_load_buf(&mp3d, data, data_size, &file_info, nullptr, nullptr);
+
+	decoder_t decoder(&file_info, deleter);
 	if(decoder->samples == 0)
 	{
 		err = "No frames loaded.";

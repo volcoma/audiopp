@@ -4,13 +4,7 @@
 #include <memory>
 namespace audio
 {
-namespace
-{
-void deleter(stb_vorbis* decoder)
-{
-	stb_vorbis_close(decoder);
-}
-} // namespace
+
 auto load_from_memory_ogg(const std::uint8_t* data, std::size_t data_size, sound_data& result,
 						  std::string& err) -> bool
 {
@@ -24,11 +18,11 @@ auto load_from_memory_ogg(const std::uint8_t* data, std::size_t data_size, sound
 		err = "No data to load from.";
 		return false;
 	}
+	static const auto deleter = [](stb_vorbis* decoder) { stb_vorbis_close(decoder); };
+	using decoder_t = std::unique_ptr<stb_vorbis, decltype(deleter)>;
 
 	int vorb_err = 0;
-	std::unique_ptr<stb_vorbis, decltype(&deleter)> decoder(
-		stb_vorbis_open_memory(data, static_cast<int>(data_size), &vorb_err, nullptr), &deleter);
-
+	decoder_t decoder(stb_vorbis_open_memory(data, static_cast<int>(data_size), &vorb_err, nullptr), deleter);
 	if(!decoder)
 	{
 		auto decoded_err = STBVorbisError(vorb_err);
