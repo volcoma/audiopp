@@ -12,6 +12,8 @@ void deleter(mp3dec_file_info_t* map_info)
 {
 	if(map_info->buffer)
 		free(map_info->buffer);
+
+    delete map_info;
 }
 } // namespace
 
