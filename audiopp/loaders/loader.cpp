@@ -62,6 +62,7 @@ auto read_stream(std::basic_istream<CharT, Traits>& in, Container& container) ->
 }
 } // namespace detail
 using byte_array_t = std::vector<uint8_t>;
+using load_callback = bool (*)(const std::uint8_t*, std::size_t, sound_data&, std::string&);
 
 auto get_extension(const std::string& path) -> std::string
 {
@@ -84,6 +85,24 @@ auto load_file(const std::string& path, byte_array_t& buffer) -> bool
 	}
 
 	return detail::read_stream(stream, buffer);
+}
+
+auto load_from_file_impl(load_callback loader, const std::string& path, sound_data& result, std::string& err)
+	-> bool
+{
+	byte_array_t buffer;
+	if(!load_file(path, buffer))
+	{
+		err = "Failed to load file : " + path;
+		return false;
+	}
+	if(!loader(buffer.data(), buffer.size(), result, err))
+	{
+		return false;
+	}
+
+	result.info.id = path;
+	return true;
 }
 
 auto load_from_memory(const uint8_t* data, size_t size, sound_data& result, std::string& err) -> bool
@@ -110,73 +129,22 @@ auto load_from_memory(const uint8_t* data, size_t size, sound_data& result, std:
 
 auto load_from_file_ogg(const std::string& path, sound_data& result, std::string& err) -> bool
 {
-	byte_array_t buffer;
-	if(!load_file(path, buffer))
-	{
-		err = "Failed to load file : " + path;
-		return false;
-	}
-
-	if(!load_from_memory_ogg(buffer.data(), buffer.size(), result, err))
-	{
-		return false;
-	}
-
-	result.info.id = path;
-	return true;
+	return load_from_file_impl(load_from_memory_ogg, path, result, err);
 }
+
 auto load_from_file_wav(const std::string& path, sound_data& result, std::string& err) -> bool
 {
-	byte_array_t buffer;
-	if(!load_file(path, buffer))
-	{
-		err = "Failed to load file : " + path;
-		return false;
-	}
-
-	if(!load_from_memory_wav(buffer.data(), buffer.size(), result, err))
-	{
-		return false;
-	}
-
-	result.info.id = path;
-	return true;
+	return load_from_file_impl(load_from_memory_wav, path, result, err);
 }
 
 auto load_from_file_mp3(const std::string& path, sound_data& result, std::string& err) -> bool
 {
-	byte_array_t buffer;
-	if(!load_file(path, buffer))
-	{
-		err = "Failed to load file : " + path;
-		return false;
-	}
-
-	if(!load_from_memory_mp3(buffer.data(), buffer.size(), result, err))
-	{
-		return false;
-	}
-
-	result.info.id = path;
-	return true;
+	return load_from_file_impl(load_from_memory_mp3, path, result, err);
 }
 
 auto load_from_file_flac(const std::string& path, sound_data& result, std::string& err) -> bool
 {
-	byte_array_t buffer;
-	if(!load_file(path, buffer))
-	{
-		err = "Failed to load file : " + path;
-		return false;
-	}
-
-	if(!load_from_memory_flac(buffer.data(), buffer.size(), result, err))
-	{
-		return false;
-	}
-
-	result.info.id = path;
-	return true;
+	return load_from_file_impl(load_from_memory_flac, path, result, err);
 }
 
 auto load_from_file(const std::string& path, sound_data& result, std::string& err) -> bool
