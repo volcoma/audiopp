@@ -48,7 +48,7 @@ auto source_impl::bind(sound_impl* sound) -> bool
 
 auto source_impl::has_bound_sound() const -> bool
 {
-	return get_queued_buffers() != 0;
+	return get_bound_sound_uid() != 0;
 }
 
 void source_impl::unbind()
