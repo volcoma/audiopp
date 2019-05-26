@@ -58,10 +58,13 @@ void source_impl::unbind()
 
 void source_impl::set_playback_position(float seconds)
 {
-	// temporary load the whole sound here
-	// until we figure out a good way to load until the position we need it
-	while(update_stream())
-		;
+	if(bound_sound_)
+	{
+		auto duration = sound_info::duration_t(seconds);
+		auto extra_duration = sound_info::duration_t(1.0f);
+		auto required_size = bound_sound_->get_byte_size_for(duration + extra_duration);
+		bound_sound_->upload_until(required_size);
+	}
 
 	al_check(alSourcef(handle_, AL_SEC_OFFSET, seconds));
 }
@@ -215,7 +218,7 @@ void source_impl::unqueue_buffers(size_t count) const
 	}
 }
 
-size_t source_impl::get_queued_buffers() const
+auto source_impl::get_queued_buffers() const -> size_t
 {
 	ALint queued = 0;
 	al_check(alGetSourcei(handle_, AL_BUFFERS_QUEUED, &queued));

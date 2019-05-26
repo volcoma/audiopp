@@ -57,7 +57,7 @@ public:
 	void enqueue_buffers(const native_handle_type* handles, size_t count) const;
 	void unqueue_buffers(size_t count) const;
 
-	size_t get_queued_buffers() const;
+	auto get_queued_buffers() const -> size_t;
 
 private:
 	void bind_sound(sound_impl* sound);

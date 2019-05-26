@@ -132,6 +132,16 @@ auto sound_impl::upload_chunk(size_t desired_size) -> bool
 	return true;
 }
 
+auto sound_impl::upload_until(size_t desired_size) -> bool
+{
+	if(data_offset_ >= desired_size)
+	{
+		return true;
+	}
+	auto left_size = desired_size - data_offset_;
+	return upload_chunk(left_size);
+}
+
 auto sound_impl::get_info() const -> const sound_info&
 {
 	return info_;

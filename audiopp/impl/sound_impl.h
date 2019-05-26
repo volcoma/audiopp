@@ -35,21 +35,21 @@ private:
 	friend class source_impl;
 
 	auto upload_chunk(size_t desired_size) -> bool;
+	auto upload_until(size_t desired_size) -> bool;
 	void bind_to_source(source_impl* source);
 	void unbind_from_source(source_impl* source);
 	void unbind_from_all_sources();
+
 	/// created buffer handles
 	std::vector<native_handle_type> handles_;
-
 	/// transient data valid until the audio is being streamed from memory
 	std::vector<std::uint8_t> data_;
 	/// offset into the data buffer to upload from
 	size_t data_offset_{0};
-
 	/// the sound info
 	sound_info info_;
 	/// openal doesn't let us destroy sounds that are
-	/// binded, so we have to keep this bookkeeping
+	/// bound, so we have to keep this bookkeeping
 	std::mutex mutex_;
 	std::vector<source_impl*> bound_to_sources_;
 
