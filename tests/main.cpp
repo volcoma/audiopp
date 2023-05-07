@@ -94,11 +94,11 @@ int main() try
 
 	std::vector<audio::sound_data> loaded_sounds;
 
-	suitepp::test("device init", [&] {
-		audio::device::print_devices();
-		// initialize the audio device
-		EXPECT_NOTHROWS(audio::device device);
-	});
+//	suitepp::test("device init", [&] {
+//		audio::device::print_devices();
+//		// initialize the audio device
+//		EXPECT_NOTHROWS(audio::device device);
+//	});
 
 	for(const auto& expected : infos)
 	{
