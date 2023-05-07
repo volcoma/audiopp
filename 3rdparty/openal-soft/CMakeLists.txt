@@ -11,8 +11,11 @@ set( ALSOFT_BUILD_IMPORT_LIB OFF CACHE BOOL "Build an import .lib using dlltool 
 #	set( ALSOFT_STATIC_LIBGCC ON CACHE BOOL "Force -static-libgcc for static GCC runtimes" FORCE)
 #endif()
 
+if(MSVC)
+    add_compile_options("/wd4018")
+else()
+    add_compile_options("-Wno-type-limits")
+endif()
+
 add_subdirectory( openal-soft )
 
-if(MSVC)
-    target_compile_options(OpenAL PRIVATE /wd4018)
-endif()
