@@ -412,6 +412,11 @@
             "name": "windows-x64-msvc2022-release",
             "inherits": "test-base",
             "configurePreset": "windows-x64-msvc2022"
+        },
+        {
+            "name": "windows-x64-mingw-release",
+            "inherits": "test-base",
+            "configurePreset": "windows-x64-mingw"
         }
     ]
 }
