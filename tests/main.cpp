@@ -92,13 +92,10 @@ int main() try
 		}
 	}
 
-	std::vector<audio::sound_data> loaded_sounds;
 
-//	suitepp::test("device init", [&] {
-//		audio::device::print_devices();
-//		// initialize the audio device
-//		EXPECT_NOTHROWS(audio::device device);
-//	});
+
+
+	std::vector<audio::sound_data> loaded_sounds;
 
 	for(const auto& expected : infos)
 	{
@@ -107,47 +104,68 @@ int main() try
 			audio::sound_data loaded;
 			EXPECT(audio::load_from_file(expected.id, loaded, err));
 
-//			EXPECT(loaded.info.bits_per_sample == expected.bits_per_sample);
-//			EXPECT(loaded.info.sample_rate == expected.sample_rate);
-//			EXPECT(loaded.info.channels == expected.channels);
+			EXPECT(loaded.info.bits_per_sample == expected.bits_per_sample);
+			EXPECT(loaded.info.sample_rate == expected.sample_rate);
+			EXPECT(loaded.info.channels == expected.channels);
 
-//			if(err.empty())
-//			{
-//				// audio::info() << to_string(data.info);
-//				loaded_sounds.emplace_back(std::move(loaded));
-//			}
+			if(err.empty())
+			{
+				// audio::info() << to_string(data.info);
+				loaded_sounds.emplace_back(std::move(loaded));
+			}
 		});
 	}
 
-	//	audio::device device;
-	//	for(auto& data : loaded_sounds)
-	//	{
-	//		suitepp::test("playback " + data.info.id, [&] {
-	//			auto code = [&]() {
-	//				// creating large internal buffer and uploading it at once
-	//				// can be slow so we can stream it in chunks if we want to
-	//				bool stream = false;
-	//				audio::sound sound(std::move(data), stream);
+    auto playback_devices = audio::device::enumerate_playback_devices();
+    if(playback_devices.empty())
+    {
+        return 0;
+    }
 
-	//				audio::source source;
-	//				source.bind(sound);
-	//				source.play();
 
-	//				while(source.is_playing())
-	//				{
-	//					std::this_thread::sleep_for(16067us);
+    suitepp::test("device init", [&] {
+		audio::device::print_devices();
+		// initialize the audio device
 
-	//					// you can also append more data to the sound at any time
-	//					// std::vector<uint8_t> some_next_chunk = ;
-	//					// sound.append_chunk(std::move(some_next_chunk));
+        auto playback_devices = audio::device::enumerate_playback_devices();
+        if(playback_devices.empty())
+        {
+            return;
+        }
 
-	//					source.update_stream();
-	//				}
-	//			};
+        EXPECT_NOTHROWS(audio::device device);
+	});
 
-	//			EXPECT_NOTHROWS(code());
-	//		});
-	//	}
+
+//    audio::device device;
+//    for(auto& data : loaded_sounds)
+//    {
+//        suitepp::test("playback " + data.info.id, [&] {
+//            auto code = [&]() {
+//                // creating large internal buffer and uploading it at once
+//                // can be slow so we can stream it in chunks if we want to
+//                bool stream = false;
+//                audio::sound sound(std::move(data), stream);
+
+//                audio::source source;
+//                source.bind(sound);
+//                source.play();
+
+//                while(source.is_playing())
+//                {
+//                    std::this_thread::sleep_for(16067us);
+
+//                    // you can also append more data to the sound at any time
+//                    // std::vector<uint8_t> some_next_chunk = ;
+//                    // sound.append_chunk(std::move(some_next_chunk));
+
+//                    source.update(16067us);
+//                }
+//            };
+
+//            EXPECT_NOTHROWS(code());
+//        });
+//    }
 	return 0;
 }
 catch(const audio::exception& e)
