@@ -14,11 +14,8 @@ set_target_properties(audiopp PROPERTIES
     WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
-find_package(OpenAL REQUIRED)
-
 target_link_libraries(audiopp PRIVATE decoders)
-target_link_libraries(audiopp PRIVATE ${OPENAL_LIBRARY})
-target_include_directories(audiopp PRIVATE ${OPENAL_INCLUDE_DIR})
+target_link_libraries(audiopp PRIVATE OpenAL::OpenAL)
 
 
 include(target_warning_support)

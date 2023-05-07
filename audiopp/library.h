@@ -6,3 +6,5 @@
 #include "logger.h"
 #include "sound.h"
 #include "source.h"
+#include "effects/effect.h"
+#include "effects/builtin_effect.h"

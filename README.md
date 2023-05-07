@@ -1,5 +1,6 @@
-[![Build Status](https://travis-ci.org/volcoma/audiopp.svg?branch=master)](https://travis-ci.org/volcoma/audiopp)
-[![Build status](https://ci.appveyor.com/api/projects/status/ytbigal46vf5kr2t?svg=true)](https://ci.appveyor.com/project/volcoma/audiopp)
+![windows](https://github.com/volcoma/audiopp/actions/workflows/windows.yml/badge.svg)
+![linux](https://github.com/volcoma/audiopp/actions/workflows/linux.yml/badge.svg)
+![macos](https://github.com/volcoma/audiopp/actions/workflows/macos.yml/badge.svg)
 
 ## audiopp c++14 cross-platform audio library
 - Supports loading of .wav/.ogg/.mp3/.flac formats
