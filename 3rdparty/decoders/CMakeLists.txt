@@ -8,6 +8,11 @@ target_compile_definitions(decoders PUBLIC _CRT_SECURE_NO_WARNINGS=1)
 if(MSVC)
     target_compile_options(decoders PUBLIC /wd4244 /wd4456 /wd4457 /wd4100 /wd4245 /wd4701)
 else()
+
+    if(CMAKE_COMPILER_IS_GNUCC)
+        target_compile_options(decoders PUBLIC -Wno-maybe-uninitialized)
+    endif()
+
     target_compile_options(decoders PUBLIC -Wno-unused-variable -Wno-unused-parameter)
 endif()
 
