@@ -13,7 +13,6 @@ set( ALSOFT_BUILD_IMPORT_LIB OFF CACHE BOOL "Build an import .lib using dlltool 
 
 add_subdirectory( openal-soft )
 
-target_include_directories (OpenAL PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/openal-soft/include)
 if(MSVC)
     target_compile_options(OpenAL PRIVATE /wd4018)
 endif()

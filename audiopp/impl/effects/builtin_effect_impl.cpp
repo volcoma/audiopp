@@ -1,6 +1,6 @@
 #include "builtin_effect_impl.h"
 //#define AL_ALEXT_PROTOTYPES
-#include "efx.h"
+#include <efx.h>
 
 #include "../../exception.h"
 #include "../../source.h"
@@ -210,7 +210,7 @@ void builtin_effect_impl::bound_sources_visitor(F&& func) noexcept(noexcept(std:
     is_iterating_bound_sources_ = false;
 }
 
-void builtin_effect_impl::set_effect_type(int effect_type)
+void builtin_effect_impl::set_effect_type(ALenum effect_type)
 {
     alEffecti(effect_id_, AL_EFFECT_TYPE, effect_type);
     if(alGetError() != AL_NO_ERROR)
@@ -221,17 +221,17 @@ void builtin_effect_impl::set_effect_type(int effect_type)
     }
 }
 
-void builtin_effect_impl::set_effect_value(int effect_type, const effect_param<float>& value)
+void builtin_effect_impl::set_effect_value(ALenum effect_type, const effect_param<float>& value)
 {
     alEffectf(effect_id_, effect_type, value.get());
 }
 
-void builtin_effect_impl::set_effect_value(int effect_type, const effect_param<std::array<float, 3>>& value)
+void builtin_effect_impl::set_effect_value(ALenum effect_type, const effect_param<std::array<float, 3>>& value)
 {
     alEffectfv(effect_id_, effect_type, (ALfloat*)value.get().data());
 }
 
-void builtin_effect_impl::set_effect_value_impl(ALuint effect_id, ALenum effect_type, ALint value)
+void builtin_effect_impl::set_effect_value_impl(ALenum effect_type, ALint value)
 {
     alEffecti(effect_id_, effect_type, value);
     check_for_error();
@@ -264,30 +264,30 @@ void builtin_effect_impl::check_for_error()
 
 void builtin_effect_impl::set_param(const builtin_effect::eaxreverb& param)
 {
-//    set_effect_type(AL_EFFECT_EAXREVERB);
+    set_effect_type(AL_EFFECT_EAXREVERB);
 
-//    set_effect_value(AL_EAXREVERB_DENSITY, param.density);
-//    set_effect_value(AL_EAXREVERB_DIFFUSION, param.diffusion);
-//    set_effect_value(AL_EAXREVERB_GAIN, param.gain);
-//    set_effect_value(AL_EAXREVERB_GAINHF, param.gainhf);
-//    set_effect_value(AL_EAXREVERB_GAINLF, param.gainlf);
-//    set_effect_value(AL_EAXREVERB_DECAY_TIME, param.decay_time);
-//    set_effect_value(AL_EAXREVERB_DECAY_HFRATIO, param.decay_hfratio);
-//    set_effect_value(AL_EAXREVERB_DECAY_LFRATIO, param.decay_lfratio);
-//    set_effect_value(AL_EAXREVERB_REFLECTIONS_GAIN, param.reflections_gain);
-//    set_effect_value(AL_EAXREVERB_REFLECTIONS_DELAY, param.reflections_delay);
-//    set_effect_value(AL_EAXREVERB_REFLECTIONS_PAN, param.reflections_pan);
-//    set_effect_value(AL_EAXREVERB_LATE_REVERB_GAIN, param.late_reverb_gain);
-//    set_effect_value(AL_EAXREVERB_LATE_REVERB_DELAY, param.late_reverb_delay);
-//    set_effect_value(AL_EAXREVERB_LATE_REVERB_PAN, param.late_reverb_pan);
-//    set_effect_value(AL_EAXREVERB_ECHO_TIME, param.echo_time);
-//    set_effect_value(AL_EAXREVERB_ECHO_DEPTH, param.echo_depth);
-//    set_effect_value(AL_EAXREVERB_MODULATION_TIME, param.modulation_time);
-//    set_effect_value(AL_EAXREVERB_MODULATION_DEPTH, param.modulation_depth);
-//    set_effect_value(AL_EAXREVERB_AIR_ABSORPTION_GAINHF, param.air_absorption_gainhf);
-//    set_effect_value(AL_EAXREVERB_HFREFERENCE, param.hfreference);
-//    set_effect_value(AL_EAXREVERB_LFREFERENCE, param.lfreference);
-//    set_effect_value(AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, param.room_rolloff_factor);
+    set_effect_value(AL_EAXREVERB_DENSITY, param.density);
+    set_effect_value(AL_EAXREVERB_DIFFUSION, param.diffusion);
+    set_effect_value(AL_EAXREVERB_GAIN, param.gain);
+    set_effect_value(AL_EAXREVERB_GAINHF, param.gainhf);
+    set_effect_value(AL_EAXREVERB_GAINLF, param.gainlf);
+    set_effect_value(AL_EAXREVERB_DECAY_TIME, param.decay_time);
+    set_effect_value(AL_EAXREVERB_DECAY_HFRATIO, param.decay_hfratio);
+    set_effect_value(AL_EAXREVERB_DECAY_LFRATIO, param.decay_lfratio);
+    set_effect_value(AL_EAXREVERB_REFLECTIONS_GAIN, param.reflections_gain);
+    set_effect_value(AL_EAXREVERB_REFLECTIONS_DELAY, param.reflections_delay);
+    set_effect_value(AL_EAXREVERB_REFLECTIONS_PAN, param.reflections_pan);
+    set_effect_value(AL_EAXREVERB_LATE_REVERB_GAIN, param.late_reverb_gain);
+    set_effect_value(AL_EAXREVERB_LATE_REVERB_DELAY, param.late_reverb_delay);
+    set_effect_value(AL_EAXREVERB_LATE_REVERB_PAN, param.late_reverb_pan);
+    set_effect_value(AL_EAXREVERB_ECHO_TIME, param.echo_time);
+    set_effect_value(AL_EAXREVERB_ECHO_DEPTH, param.echo_depth);
+    set_effect_value(AL_EAXREVERB_MODULATION_TIME, param.modulation_time);
+    set_effect_value(AL_EAXREVERB_MODULATION_DEPTH, param.modulation_depth);
+    set_effect_value(AL_EAXREVERB_AIR_ABSORPTION_GAINHF, param.air_absorption_gainhf);
+    set_effect_value(AL_EAXREVERB_HFREFERENCE, param.hfreference);
+    set_effect_value(AL_EAXREVERB_LFREFERENCE, param.lfreference);
+    set_effect_value(AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, param.room_rolloff_factor);
 }
 
 void builtin_effect_impl::set_param(const builtin_effect::reverb& param)

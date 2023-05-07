@@ -1,6 +1,6 @@
 #include "listener_impl.h"
 #include "check.h"
-#include <AL/al.h>
+#include <al.h>
 
 namespace audio
 {

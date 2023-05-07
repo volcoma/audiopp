@@ -3,7 +3,7 @@
 #include "../logger.h"
 #include <string>
 
-#include <Al/al.h>
+#include <al.h>
 
 namespace audio
 {

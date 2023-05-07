@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../sound_info.h"
-#include <AL/al.h>
+#include <al.h>
 #include <mutex>
 #include <vector>
 

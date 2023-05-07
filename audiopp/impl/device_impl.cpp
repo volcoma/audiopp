@@ -4,8 +4,8 @@
 #include "../logger.h"
 #include "check.h"
 
-#include "al.h"
-#include "efx.h"
+#include <al.h>
+#include <efx.h>
 #include <sstream>
 
 namespace audio

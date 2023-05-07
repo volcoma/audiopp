@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include <AL/alc.h>
+#include <alc.h>
 
 namespace audio
 {

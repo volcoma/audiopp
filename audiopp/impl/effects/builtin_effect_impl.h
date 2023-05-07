@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../../effects/builtin_effect.h"
-#include <AL/al.h>
-#include <Al/efx.h>
+#include <al.h>
+#include <efx.h>
 
 #include <unordered_set>
 
@@ -62,15 +62,15 @@ private:
     void
     bound_sources_visitor(F&& func) noexcept(noexcept(std::forward<F>(func)(std::declval<source_impl*>())));
 
-    void set_effect_type(int effect_type);
+    void set_effect_type(ALenum effect_type);
 
-    void set_effect_value(int effect_type, const effect_param<float>& value);
-    void set_effect_value(int effect_type, const effect_param<std::array<float, 3>>& value);
+    void set_effect_value(ALenum effect_type, const effect_param<float>& value);
+    void set_effect_value(ALenum effect_type, const effect_param<std::array<float, 3>>& value);
 
     template<typename T>
-    void set_effect_value(int effect_type, const T& value);
+    void set_effect_value(ALenum effect_type, const T& value);
 
-    void set_effect_value_impl(ALuint effect_id, ALenum effect_type, ALint value);
+    void set_effect_value_impl(ALenum effect_type, ALint value);
 
     void check_for_error();
 
@@ -81,10 +81,10 @@ private:
 };
 
 template<typename T>
-void builtin_effect_impl::set_effect_value(int effect_type, const T& value)
+void builtin_effect_impl::set_effect_value(ALenum effect_type, const T& value)
 {
     int vi = static_cast<int>(value);
-    set_effect_value_impl(effect_id_, effect_type, vi);
+    set_effect_value_impl(effect_type, vi);
 }
 
 } //end of namespace detail
