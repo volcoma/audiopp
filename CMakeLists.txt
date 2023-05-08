@@ -3,12 +3,8 @@
 project(audiopp)
 include(CTest)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake/utility")
-
 option(BUILD_AUDIOPP_SHARED "Build as a shared library." ON)
 option(BUILD_AUDIOPP_TESTS "Build the tests" ON)
-option(BUILD_AUDIOPP_WITH_CODE_STYLE_CHECKS "Build with code style checks." OFF)
 
 if(BUILD_AUDIOPP_TESTS)
 	if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
@@ -26,9 +22,6 @@ if(BUILD_AUDIOPP_SHARED)
 	set(BUILD_SHARED_LIBS ON)
 endif()
 
-if(BUILD_AUDIOPP_WITH_CODE_STYLE_CHECKS)
-	set(BUILD_WITH_CODE_STYLE_CHECKS ON)
-endif()
 
 add_subdirectory(3rdparty)
 add_subdirectory(audiopp)

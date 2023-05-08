@@ -13,7 +13,7 @@ else()
         target_compile_options(decoders PUBLIC -Wno-maybe-uninitialized)
     endif()
 
-    target_compile_options(decoders PUBLIC -Wno-unused-variable -Wno-unused-parameter)
+    target_compile_options(decoders PUBLIC -Wno-unused-variable -Wno-unused-parameter -Wno-Wdeprecated-declarations)
 endif()
 
 
