@@ -1,6 +1,6 @@
 #include <audiopp/library.h>
 #include <audiopp/loaders/loader.h>
-#include <suitepp/suitepp.hpp>
+#include <suitepp/suite.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -99,7 +99,8 @@ int main() try
 
 	for(const auto& expected : infos)
 	{
-		suitepp::test("loading " + expected.id, [&] {
+		TEST_CASE("loading " + expected.id)
+        {
 			std::string err;
 			audio::sound_data loaded;
 			EXPECT(audio::load_from_file(expected.id, loaded, err));
@@ -113,7 +114,7 @@ int main() try
 				// audio::info() << to_string(data.info);
 				loaded_sounds.emplace_back(std::move(loaded));
 			}
-		});
+		};
 	}
 
     auto playback_devices = audio::device::enumerate_playback_devices();
@@ -123,24 +124,20 @@ int main() try
     }
 
 
-    suitepp::test("device init", [&] {
+    TEST_CASE("device init")
+    {
 		audio::device::print_devices();
 		// initialize the audio device
 
-        auto playback_devices = audio::device::enumerate_playback_devices();
-        if(playback_devices.empty())
-        {
-            return;
-        }
-
         EXPECT_NOTHROWS(audio::device device);
-	});
+	};
 
 
 //    audio::device device;
 //    for(auto& data : loaded_sounds)
 //    {
-//        suitepp::test("playback " + data.info.id, [&] {
+//        TEST_CASE("playback " + data.info.id)
+//        {
 //            auto code = [&]() {
 //                // creating large internal buffer and uploading it at once
 //                // can be slow so we can stream it in chunks if we want to
@@ -164,7 +161,7 @@ int main() try
 //            };
 
 //            EXPECT_NOTHROWS(code());
-//        });
+//        };
 //    }
 	return 0;
 }
