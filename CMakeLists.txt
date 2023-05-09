@@ -1,7 +1,6 @@
-﻿cmake_minimum_required(VERSION 3.4.3)
+cmake_minimum_required(VERSION 3.4.3)
 
 project(audiopp)
-include(CTest)
 
 option(BUILD_AUDIOPP_SHARED "Build as a shared library." ON)
 option(BUILD_AUDIOPP_TESTS "Build the tests" ON)
@@ -27,5 +26,6 @@ add_subdirectory(3rdparty)
 add_subdirectory(audiopp)
 
 if(BUILD_AUDIOPP_TESTS)
-	add_subdirectory(tests)
+    include(CTest)
+    add_subdirectory(tests)
 endif()
