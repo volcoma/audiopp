@@ -1,3 +1,6 @@
+cmake_minimum_required(VERSION 3.8)
+cmake_policy(SET CMP0067 NEW)
+
 set( ALSOFT_UTILS OFF CACHE BOOL "Build and install utility programs" FORCE)
 set( ALSOFT_EXAMPLES OFF CACHE BOOL "Build and install example programs" FORCE)
 set( ALSOFT_TESTS OFF CACHE BOOL "Build and install test programs" FORCE)

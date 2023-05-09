@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4.3)
+cmake_minimum_required(VERSION 3.8)
 
 project(audiopp)
 
@@ -21,6 +21,16 @@ if(BUILD_AUDIOPP_SHARED)
 	set(BUILD_SHARED_LIBS ON)
 endif()
 
+include(CheckFunctionExists)
+include(CheckLibraryExists)
+include(CheckIncludeFile)
+include(CheckIncludeFiles)
+include(CheckSymbolExists)
+include(CheckCCompilerFlag)
+include(CheckCXXCompilerFlag)
+include(CheckCSourceCompiles)
+include(CheckCXXSourceCompiles)
+include(CheckStructHasMember)
 
 add_subdirectory(3rdparty)
 add_subdirectory(audiopp)
