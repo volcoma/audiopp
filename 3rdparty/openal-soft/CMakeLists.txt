@@ -1,3 +1,6 @@
+cmake_minimum_required(VERSION 3.8)
+cmake_policy(SET CMP0067 NEW)
+
 set( ALSOFT_UTILS OFF CACHE BOOL "Build and install utility programs" FORCE)
 set( ALSOFT_EXAMPLES OFF CACHE BOOL "Build and install example programs" FORCE)
 set( ALSOFT_TESTS OFF CACHE BOOL "Build and install test programs" FORCE)
@@ -11,11 +14,13 @@ set( ALSOFT_BUILD_IMPORT_LIB OFF CACHE BOOL "Build an import .lib using dlltool 
 #	set( ALSOFT_STATIC_LIBGCC ON CACHE BOOL "Force -static-libgcc for static GCC runtimes" FORCE)
 #endif()
 
-if(MSVC)
-    add_compile_options("/wd4018")
-else()
-    add_compile_options("-Wno-type-limits")
-endif()
-
 add_subdirectory( openal-soft )
+
+target_include_directories (OpenAL PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/openal-soft/include/AL)
+
+if(MSVC)
+    target_compile_options (OpenAL PUBLIC /wd4018)
+else()
+    target_compile_options (OpenAL PUBLIC -Wno-type-limits -Wno-switch)
+endif()
 

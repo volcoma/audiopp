@@ -15,4 +15,4 @@ set_target_properties(audiopp PROPERTIES
 )
 
 target_link_libraries(audiopp PRIVATE decoders)
-target_link_libraries(audiopp PRIVATE OpenAL::OpenAL)
+target_link_libraries(audiopp PRIVATE OpenAL)
