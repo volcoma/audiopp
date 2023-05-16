@@ -21,6 +21,6 @@ target_include_directories (OpenAL PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/openal-sof
 if(MSVC)
     target_compile_options (OpenAL PUBLIC /wd4018)
 else()
-    target_compile_options (OpenAL PUBLIC -Wno-type-limits -Wno-switch)
+    target_compile_options (OpenAL PUBLIC -Wno-type-limits -Wno-switch -Wno-format-extra-args -Wno-format)
 endif()
 
