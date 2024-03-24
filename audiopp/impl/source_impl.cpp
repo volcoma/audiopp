@@ -8,16 +8,23 @@ namespace audio
 {
 namespace detail
 {
+namespace
+{
+int count = 0;
+}
+
 source_impl::source_impl()
 {
     al_check(alGenSources(1, &handle_));
 
     if(!is_valid())
     {
-        throw audio::exception("Cannot create source.");
+		throw audio::exception("Cannot create source. Max Sources reached " + std::to_string(count));
     }
 
     al_check(alSourcei(handle_, AL_SOURCE_RELATIVE, AL_FALSE));
+
+	count++;
 }
 
 source_impl::~source_impl()
@@ -30,6 +37,7 @@ source_impl::~source_impl()
     unbind();
 
     al_check(alDeleteSources(1, &handle_));
+	count--;
 }
 
 auto source_impl::bind(sound_impl* sound) -> bool
