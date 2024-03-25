@@ -19,7 +19,7 @@ add_subdirectory( openal-soft )
 target_include_directories (OpenAL PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/openal-soft/include/AL)
 
 if(MSVC)
-    target_compile_options (OpenAL PUBLIC /wd4018)
+    target_compile_options (OpenAL PUBLIC /wd4018 /wd4267 /wd4244)
 else()
     target_compile_options (OpenAL PUBLIC -Wno-type-limits -Wno-switch -Wno-format-extra-args -Wno-format)
 endif()
